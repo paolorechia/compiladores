@@ -11,6 +11,7 @@
 #include "compilador.h"
 
 int num_vars;
+extern char * yytext;
 
 %}
 
@@ -75,9 +76,13 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-expr: expr SOMA expr | expr SUBTRACAO expr | expr MULTIPLICACAO expr | expr DIVISAO expr | NUMERO
+expr:   expr SOMA expr { printf("ADD \n"); }
+      | expr SUBTRACAO expr 
+      | expr MULTIPLICACAO expr 
+      | expr DIVISAO expr 
+      | NUMERO
 
-atribuicao: IDENT ATRIBUICAO expr PONTO_E_VIRGULA
+atribuicao: IDENT ATRIBUICAO expr PONTO_E_VIRGULA { }
 
 comando_composto: T_BEGIN comandos T_END 
 
