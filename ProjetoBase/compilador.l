@@ -99,6 +99,12 @@ end { simbolo = simb_end;
           return FECHA_PARENTESES;
  }
 
+\+  { simbolo = simb_soma;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" soma ");
+          return SOMA;
+ }
+
 if  { simbolo = simb_if;  
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" if ");
