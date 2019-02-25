@@ -99,6 +99,12 @@ end { simbolo = simb_end;
           return FECHA_PARENTESES;
  }
 
+if  { simbolo = simb_if;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" if ");
+          return IF;
+ }
+
 {ident} { simbolo = simb_identificador; 
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" ident  ");
