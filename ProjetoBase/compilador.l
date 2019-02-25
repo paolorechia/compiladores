@@ -104,6 +104,24 @@ end { simbolo = simb_end;
           IMPRIME(" soma ");
           return SOMA;
  }
+ 
+\-  { simbolo = simb_subtracao;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" subtracao ");
+          return SUBTRACAO;
+ }
+
+\*  { simbolo = simb_multiplicacao;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" multiplicacao ");
+          return MULTIPLICACAO;
+ }
+
+\/  { simbolo = simb_divisao;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" divisao");
+          return DIVISAO;
+ }
 
 if  { simbolo = simb_if;  
           strncpy (token, yytext, TAM_TOKEN);

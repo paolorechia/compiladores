@@ -17,7 +17,8 @@ int num_vars;
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES 
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
-%token IF NUMERO SOMA
+%token IF NUMERO
+%token SOMA SUBTRACAO MULTIPLICACAO DIVISAO
 
 %%
 
@@ -74,7 +75,7 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-expr: expr SOMA expr | NUMERO
+expr: expr SOMA expr | expr SUBTRACAO expr | expr MULTIPLICACAO expr | expr DIVISAO expr | NUMERO
 
 atribuicao: IDENT ATRIBUICAO expr PONTO_E_VIRGULA
 
