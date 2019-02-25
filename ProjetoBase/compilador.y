@@ -17,6 +17,7 @@ int num_vars;
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES 
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
+%token IF NUMERO
 
 %%
 
@@ -73,10 +74,11 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
+atribuicao: IDENT ATRIBUICAO NUMERO PONTO_E_VIRGULA
 
 comando_composto: T_BEGIN comandos T_END 
 
-comandos:    
+comandos: atribuicao
 ;
 
 

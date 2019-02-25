@@ -105,6 +105,12 @@ if  { simbolo = simb_if;
           return IF;
  }
 
+{numero} { simbolo = simb_numero;
+              strncpy(token, yytext, TAM_TOKEN);
+              IMPRIME(" numero ");
+              return NUMERO;
+ }
+
 {ident} { simbolo = simb_identificador; 
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" ident  ");
