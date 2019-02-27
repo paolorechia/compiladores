@@ -4,4 +4,5 @@ compilador.o
 compilador.tab.c
 compilador.tab.h
 lex.yy.c
-../Vagrantfile
+*Vagrantfile
+*.output
