@@ -1,6 +1,9 @@
 
 %{
 #include <stdio.h>
+#include <string.h>
+#include "posfixo.h"
+
 %}
 
 %token IDENT MAIS MENOS OR ASTERISCO DIV ABRE_PARENTESES FECHA_PARENTESES
@@ -17,7 +20,7 @@ termo      : termo ASTERISCO fator  {printf ("*"); }|
              fator
 ;
 
-fator      : IDENT {printf ("A"); }
+fator      : IDENT {printf ("%s", last_token); }
 ;
 
 %%
