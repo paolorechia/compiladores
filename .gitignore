@@ -7,5 +7,5 @@ compilador.o
 posfixo
 lex.yy.c
 *Vagrantfile
-*.output
+*output
 *.swp

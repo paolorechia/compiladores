@@ -22,7 +22,10 @@ char last_token[N];
 \-    { LE_TOKEN(MENOS); }
 \*    { LE_TOKEN(ASTERISCO);  }
 \/    { LE_TOKEN(DIV);  }
-[ab]  { LE_TOKEN(IDENT); }
+\&    { LE_TOKEN(AND); }
+\|\|    { LE_TOKEN(OR); }
+a  { LE_TOKEN(INT_IDENT); }
+b  { LE_TOKEN(BOOLEAN_IDENT); }
 
 %%
 

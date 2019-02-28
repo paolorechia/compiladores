@@ -1,6 +1,5 @@
 Terminals unused in grammar
 
-   OR
    ABRE_PARENTESES
    FECHA_PARENTESES
 
@@ -12,166 +11,257 @@ Grammar
     1 expr: expr MAIS termo
     2     | expr MENOS termo
     3     | termo
+    4     | expr_boolean
 
-    4 termo: termo ASTERISCO fator
-    5      | termo DIV fator
-    6      | fator
+    5 termo: termo ASTERISCO fator
+    6      | termo DIV fator
+    7      | fator
 
-    7 fator: IDENT
+    8 fator: INT_IDENT
+
+    9 expr_boolean: expr_boolean OR termo_boolean
+   10             | termo_boolean
+
+   11 termo_boolean: termo_boolean AND boolean
+   12              | boolean
+
+   13 boolean: BOOLEAN_IDENT
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-IDENT (258) 7
-MAIS (259) 1
-MENOS (260) 2
-OR (261)
-ASTERISCO (262) 4
-DIV (263) 5
-ABRE_PARENTESES (264)
-FECHA_PARENTESES (265)
+INT_IDENT (258) 8
+BOOLEAN_IDENT (259) 13
+MAIS (260) 1
+MENOS (261) 2
+OR (262) 9
+ASTERISCO (263) 5
+DIV (264) 6
+ABRE_PARENTESES (265)
+FECHA_PARENTESES (266)
+AND (267) 11
 
 
 Nonterminals, with rules where they appear
 
-$accept (11)
+$accept (13)
     on left: 0
-expr (12)
-    on left: 1 2 3, on right: 0 1 2
-termo (13)
-    on left: 4 5 6, on right: 1 2 3 4 5
-fator (14)
-    on left: 7, on right: 4 5 6
+expr (14)
+    on left: 1 2 3 4, on right: 0 1 2
+termo (15)
+    on left: 5 6 7, on right: 1 2 3 5 6
+fator (16)
+    on left: 8, on right: 5 6 7
+expr_boolean (17)
+    on left: 9 10, on right: 4 9
+termo_boolean (18)
+    on left: 11 12, on right: 9 10 11
+boolean (19)
+    on left: 13, on right: 11 12
 
 
 State 0
 
     0 $accept: . expr $end
 
-    IDENT  shift, and go to state 1
+    INT_IDENT      shift, and go to state 1
+    BOOLEAN_IDENT  shift, and go to state 2
 
-    expr   go to state 2
-    termo  go to state 3
-    fator  go to state 4
+    expr           go to state 3
+    termo          go to state 4
+    fator          go to state 5
+    expr_boolean   go to state 6
+    termo_boolean  go to state 7
+    boolean        go to state 8
 
 
 State 1
 
-    7 fator: IDENT .
+    8 fator: INT_IDENT .
 
-    $default  reduce using rule 7 (fator)
+    $default  reduce using rule 8 (fator)
 
 
 State 2
+
+   13 boolean: BOOLEAN_IDENT .
+
+    $default  reduce using rule 13 (boolean)
+
+
+State 3
 
     0 $accept: expr . $end
     1 expr: expr . MAIS termo
     2     | expr . MENOS termo
 
-    $end   shift, and go to state 5
-    MAIS   shift, and go to state 6
-    MENOS  shift, and go to state 7
-
-
-State 3
-
-    3 expr: termo .
-    4 termo: termo . ASTERISCO fator
-    5      | termo . DIV fator
-
-    ASTERISCO  shift, and go to state 8
-    DIV        shift, and go to state 9
-
-    $default  reduce using rule 3 (expr)
+    $end   shift, and go to state 9
+    MAIS   shift, and go to state 10
+    MENOS  shift, and go to state 11
 
 
 State 4
 
-    6 termo: fator .
+    3 expr: termo .
+    5 termo: termo . ASTERISCO fator
+    6      | termo . DIV fator
 
-    $default  reduce using rule 6 (termo)
+    ASTERISCO  shift, and go to state 12
+    DIV        shift, and go to state 13
+
+    $default  reduce using rule 3 (expr)
 
 
 State 5
+
+    7 termo: fator .
+
+    $default  reduce using rule 7 (termo)
+
+
+State 6
+
+    4 expr: expr_boolean .
+    9 expr_boolean: expr_boolean . OR termo_boolean
+
+    OR  shift, and go to state 14
+
+    $default  reduce using rule 4 (expr)
+
+
+State 7
+
+   10 expr_boolean: termo_boolean .
+   11 termo_boolean: termo_boolean . AND boolean
+
+    AND  shift, and go to state 15
+
+    $default  reduce using rule 10 (expr_boolean)
+
+
+State 8
+
+   12 termo_boolean: boolean .
+
+    $default  reduce using rule 12 (termo_boolean)
+
+
+State 9
 
     0 $accept: expr $end .
 
     $default  accept
 
 
-State 6
+State 10
 
     1 expr: expr MAIS . termo
 
-    IDENT  shift, and go to state 1
+    INT_IDENT  shift, and go to state 1
 
-    termo  go to state 10
-    fator  go to state 4
-
-
-State 7
-
-    2 expr: expr MENOS . termo
-
-    IDENT  shift, and go to state 1
-
-    termo  go to state 11
-    fator  go to state 4
-
-
-State 8
-
-    4 termo: termo ASTERISCO . fator
-
-    IDENT  shift, and go to state 1
-
-    fator  go to state 12
-
-
-State 9
-
-    5 termo: termo DIV . fator
-
-    IDENT  shift, and go to state 1
-
-    fator  go to state 13
-
-
-State 10
-
-    1 expr: expr MAIS termo .
-    4 termo: termo . ASTERISCO fator
-    5      | termo . DIV fator
-
-    ASTERISCO  shift, and go to state 8
-    DIV        shift, and go to state 9
-
-    $default  reduce using rule 1 (expr)
+    termo  go to state 16
+    fator  go to state 5
 
 
 State 11
 
-    2 expr: expr MENOS termo .
-    4 termo: termo . ASTERISCO fator
-    5      | termo . DIV fator
+    2 expr: expr MENOS . termo
 
-    ASTERISCO  shift, and go to state 8
-    DIV        shift, and go to state 9
+    INT_IDENT  shift, and go to state 1
 
-    $default  reduce using rule 2 (expr)
+    termo  go to state 17
+    fator  go to state 5
 
 
 State 12
 
-    4 termo: termo ASTERISCO fator .
+    5 termo: termo ASTERISCO . fator
 
-    $default  reduce using rule 4 (termo)
+    INT_IDENT  shift, and go to state 1
+
+    fator  go to state 18
 
 
 State 13
 
-    5 termo: termo DIV fator .
+    6 termo: termo DIV . fator
+
+    INT_IDENT  shift, and go to state 1
+
+    fator  go to state 19
+
+
+State 14
+
+    9 expr_boolean: expr_boolean OR . termo_boolean
+
+    BOOLEAN_IDENT  shift, and go to state 2
+
+    termo_boolean  go to state 20
+    boolean        go to state 8
+
+
+State 15
+
+   11 termo_boolean: termo_boolean AND . boolean
+
+    BOOLEAN_IDENT  shift, and go to state 2
+
+    boolean  go to state 21
+
+
+State 16
+
+    1 expr: expr MAIS termo .
+    5 termo: termo . ASTERISCO fator
+    6      | termo . DIV fator
+
+    ASTERISCO  shift, and go to state 12
+    DIV        shift, and go to state 13
+
+    $default  reduce using rule 1 (expr)
+
+
+State 17
+
+    2 expr: expr MENOS termo .
+    5 termo: termo . ASTERISCO fator
+    6      | termo . DIV fator
+
+    ASTERISCO  shift, and go to state 12
+    DIV        shift, and go to state 13
+
+    $default  reduce using rule 2 (expr)
+
+
+State 18
+
+    5 termo: termo ASTERISCO fator .
 
     $default  reduce using rule 5 (termo)
+
+
+State 19
+
+    6 termo: termo DIV fator .
+
+    $default  reduce using rule 6 (termo)
+
+
+State 20
+
+    9 expr_boolean: expr_boolean OR termo_boolean .
+   11 termo_boolean: termo_boolean . AND boolean
+
+    AND  shift, and go to state 15
+
+    $default  reduce using rule 9 (expr_boolean)
+
+
+State 21
+
+   11 termo_boolean: termo_boolean AND boolean .
+
+    $default  reduce using rule 11 (termo_boolean)
