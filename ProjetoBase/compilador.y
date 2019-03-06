@@ -77,7 +77,7 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 
-atribuicao: IDENT ATRIBUICAO expr PONTO_E_VIRGULA { }
+atribuicao: IDENT ATRIBUICAO NUMERO PONTO_E_VIRGULA { }
 
 expr:
 

@@ -10,6 +10,11 @@
 #define IMPRIME(STR) {};
 //#define IMPRIME(STR) printf("%s    # %s \n", STR, token);
 
+#define LE_TOKEN(STR) {\
+              strncpy(token, yytext, N);\
+              return STR;\
+              }
+
 int nl = 1;  
 
 %}
