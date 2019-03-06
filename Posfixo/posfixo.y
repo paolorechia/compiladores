@@ -12,7 +12,8 @@
 
 expr       : expr MAIS termo {printf ("+"); } |
              expr MENOS termo {printf ("-"); } | 
-             termo | expr_boolean
+             termo | 
+             expr_boolean
 ;
 
 termo      : termo ASTERISCO fator  {printf ("*"); }| 
