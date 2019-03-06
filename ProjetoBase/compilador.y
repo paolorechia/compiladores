@@ -77,17 +77,23 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 
-atribuicao: IDENT  { printf("CRCT ", token); } 
+atribuicao: IDENT   
             ATRIBUICAO 
-            NUMERO { printf("%s", token); }
-            PONTO_E_VIRGULA {printf("\n"); }
+            expr 
+            PONTO_E_VIRGULA;
+
+expr: expr MAIS termo { printf("SOMA\n"); }|
+      expr MENOS termo { printf("SUBT\n"); }|
+      termo
 ;
 
-expr: expr 
+termo: termo ASTERICO fator |
+       termo BARRA fator |
+       fator
+;
 
-termo:
-
-fator: NUMERO
+fator: NUMERO  { printf("CRCT %s\n", token); }
+;
 
 comando_composto: T_BEGIN comandos T_END 
 
