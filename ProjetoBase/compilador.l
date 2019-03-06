@@ -104,28 +104,28 @@ end { simbolo = simb_end;
           return FECHA_PARENTESES;
  }
 
-\+  { simbolo = simb_soma;  
+\+  { simbolo = simb_mais;  
           strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" soma ");
-          return SOMA;
+          IMPRIME(" mais ");
+          return MAIS;
  }
  
-\-  { simbolo = simb_subtracao;  
+\-  { simbolo = simb_menos;  
           strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" subtracao ");
-          return SUBTRACAO;
+          IMPRIME(" menos ");
+          return MENOS;
  }
 
-\*  { simbolo = simb_multiplicacao;  
+\*  { simbolo = simb_asterico;  
           strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" multiplicacao ");
-          return MULTIPLICACAO;
+          IMPRIME(" asterico ");
+          return ASTERICO;
  }
 
-\/  { simbolo = simb_divisao;  
+\/  { simbolo = simb_barra;  
           strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" divisao");
-          return DIVISAO;
+          IMPRIME(" barra ");
+          return BARRA;
  }
 
 if  { simbolo = simb_if;  

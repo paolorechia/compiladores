@@ -19,7 +19,7 @@ extern char * yytext;
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token IF NUMERO
-%token SOMA SUBTRACAO MULTIPLICACAO DIVISAO
+%token MAIS MENOS ASTERICO BARRA
 
 %%
 
@@ -64,7 +64,7 @@ declara_var : { }
               PONTO_E_VIRGULA
 ;
 
-tipo        : IDENT
+tipo        : IDENT 
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT 
@@ -77,9 +77,17 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 
-atribuicao: IDENT ATRIBUICAO NUMERO PONTO_E_VIRGULA { }
+atribuicao: IDENT  { printf("CRCT ", token); } 
+            ATRIBUICAO 
+            NUMERO { printf("%s", token); }
+            PONTO_E_VIRGULA {printf("\n"); }
+;
 
-expr:
+expr: expr 
+
+termo:
+
+fator: NUMERO
 
 comando_composto: T_BEGIN comandos T_END 
 
