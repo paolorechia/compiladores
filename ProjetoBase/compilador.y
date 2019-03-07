@@ -83,13 +83,14 @@ atribuicao: IDENT
             expr 
             PONTO_E_VIRGULA;
 
+
 expr: expr MAIS termo { geraCodigo(NULL, "SOMA"); } |
       expr MENOS termo { geraCodigo(NULL, "SUBT"); } |
       termo
 ;
 
-termo: termo ASTERICO fator |
-       termo BARRA fator |
+termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
+       termo ASTERICO fator { geraCodigo(NULL, "MULT"); } |
        fator
 ;
 
@@ -98,7 +99,7 @@ fator: NUMERO  { sprintf(temp_str, "CRCT %s", token); geraCodigo(NULL, temp_str)
 
 comando_composto: T_BEGIN comandos T_END 
 
-comandos: atribuicao | atribuicao comandos |
+comandos: atribuicao comandos |
 ;
 
 
