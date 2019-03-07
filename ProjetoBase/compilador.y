@@ -90,11 +90,14 @@ expr: expr MAIS termo { geraCodigo(NULL, "SOMA"); } |
 ;
 
 termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
-       termo ASTERICO fator { geraCodigo(NULL, "MULT"); } |
        fator
 ;
 
-fator: NUMERO  { sprintf(temp_str, "CRCT %s", token); geraCodigo(NULL, temp_str); }
+fator: fator ASTERICO num {  geraCodigo(NULL, "MULT"); } |
+       num
+;
+
+num: NUMERO { sprintf(temp_str, "CRCT %s", token); geraCodigo(NULL, temp_str); }
 ;
 
 comando_composto: T_BEGIN comandos T_END 
