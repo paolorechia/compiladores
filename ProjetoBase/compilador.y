@@ -12,6 +12,7 @@
 
 int num_vars;
 extern char * yytext;
+char temp_str[TAM_TOKEN];
 
 %}
 
@@ -82,8 +83,8 @@ atribuicao: IDENT
             expr 
             PONTO_E_VIRGULA;
 
-expr: expr MAIS termo { printf("SOMA\n"); }|
-      expr MENOS termo { printf("SUBT\n"); }|
+expr: expr MAIS termo { geraCodigo(NULL, "SOMA"); } |
+      expr MENOS termo { geraCodigo(NULL, "SUBT"); } |
       termo
 ;
 
@@ -92,7 +93,7 @@ termo: termo ASTERICO fator |
        fator
 ;
 
-fator: NUMERO  { printf("CRCT %s\n", token); }
+fator: NUMERO  { sprintf(temp_str, "CRCT %s", token); geraCodigo(NULL, temp_str); }
 ;
 
 comando_composto: T_BEGIN comandos T_END 
