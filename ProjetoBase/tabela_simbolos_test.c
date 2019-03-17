@@ -40,6 +40,17 @@ int main() {
 
   insert_table(table, new_symbol);
   l_free(new_symbol.values.procedure.parameter_list);
+
+  new_symbol.category = FUNCTION;
+  strcpy(new_symbol.identifier, "minha_funcao");
+  new_symbol.values.function.lexical_level = 1;
+  new_symbol.values.function.label = 2;
+  new_symbol.values.function.return_type = INTEGER;
+  new_symbol.values.function.parameter_list = l_init();
+  l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYREFERENCE);
+  l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYVAL);
+  insert_table(table, new_symbol);
+
   print_table(table);
   
   printf("Testing search_table...\n");

@@ -143,6 +143,12 @@ int insert_table(symbol_table * table, symbol new_symbol){
       saved_symbol->values.procedure.label = new_symbol.values.procedure.label;
       saved_symbol->values.procedure.parameter_list = l_init(); 
       l_copy(new_symbol.values.procedure.parameter_list, saved_symbol->values.procedure.parameter_list);
+    case FUNCTION:
+      saved_symbol->values.function.lexical_level = new_symbol.values.function.lexical_level;
+      saved_symbol->values.function.label = new_symbol.values.function.label;
+      saved_symbol->values.function.return_type = new_symbol.values.function.return_type;
+      saved_symbol->values.function.parameter_list = l_init(); 
+      l_copy(new_symbol.values.function.parameter_list, saved_symbol->values.function.parameter_list);
   }
   return 0;
 }
@@ -194,6 +200,9 @@ void print_table(symbol_table * table) {
           break;
         case PROCEDURE:
           print_procedure_symbol(table->symbols[i]);
+          break;
+        case FUNCTION:
+          print_function_symbol(table->symbols[i]);
           break;
       }
   }
@@ -285,6 +294,57 @@ void print_procedure_symbol(symbol s) {
     printf("| %s | PROCEDURE | lexical_level: %d | label: %d | params: %s\n",
               s.identifier, s.values.procedure.lexical_level, s.values.procedure.label, 
               params_string);
+    }
+}
+void print_function_symbol(symbol s) {
+  thead * parameter_list = s.values.function.parameter_list;
+  char return_type_str[32];
+  switch(s.values.function.return_type) {
+    case INTEGER:
+      strcpy(return_type_str, "INTEGER");
+      break;
+    case BOOLEAN:
+      strcpy(return_type_str, "BOOLEAN");
+      break;
+    case UNDEFINED:
+      strcpy(return_type_str, "UNDEFINED");
+      break;
+  }
+  if (parameter_list->size > 0) {
+    char var_type_str[32];
+    char param_type_str[32];
+    char current_param[96];
+    char params_string[2048];
+    strcpy(params_string, "( ");
+    tnode * node = parameter_list->node;
+    while (node->nxt != NULL){
+      node = node->nxt;
+      switch(node->variable_type) {
+        case INTEGER:
+          strcpy(var_type_str, "INTEGER");
+          break;
+        case BOOLEAN:
+          strcpy(var_type_str, "BOOLEAN");
+          break;
+        case UNDEFINED:
+          strcpy(var_type_str, "UNDEFINED");
+          break;
+      }
+      switch(node->parameter_type) {
+        case BYVAL:
+          strcpy(param_type_str, "BYVAL");
+          break;
+        case BYREFERENCE:
+          strcpy(param_type_str, "BYREF");
+          break;
+      }
+      sprintf(current_param, "VarType: %s, ParamType: %s; ", var_type_str, param_type_str);
+      strcat(params_string, current_param);
+    }
+    strcat(params_string, ")");
+    printf("| %s | FUNCTION | lexical_level: %d | label: %d | return_type: %s | params: %s\n",
+              s.identifier, s.values.function.lexical_level, s.values.function.label, 
+              return_type_str, params_string);
     }
 }
 

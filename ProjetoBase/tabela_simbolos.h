@@ -37,8 +37,8 @@ typedef union level {
   struct function {
     short lexical_level;
     short label;
-    ParameterType return_type;
-    thead * parameter_return_list;
+    VariableType return_type;
+    thead * parameter_list;
   } function;
 } symbol_union;
 
@@ -77,3 +77,4 @@ void print_table(symbol_table * table);
 void print_variable_symbol(symbol s);
 void print_parameter_symbol(symbol s);
 void print_procedure_symbol(symbol s);
+void print_function_symbol(symbol s);
