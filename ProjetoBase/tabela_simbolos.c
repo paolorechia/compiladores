@@ -37,12 +37,24 @@ int insert_table(symbol_table * table, symbol new_symbol){
   return 0;
 }
 
-int remove_table(symbol_table * table, int new_symbol){
-  return 0;
+int remove_table(symbol_table * table){
+  if (table->idx > -1) {
+    table->idx--;
+    return 0;
+  }
+  return -1;
 }
 
 int search_table(symbol_table * table, char id[TAM_TOKEN]){
-  return 0;
+  int idx = -1;
+  int i = table->idx;
+  while (i >= 0 && idx == -1) {
+    if (strcmp(table->symbols[i].identifier, id) == 0) {
+      idx = i;
+    }
+    i--;
+  }
+  return idx;
 }
 
 void print_table(symbol_table * table) {
@@ -106,7 +118,7 @@ void print_parameter_symbol(symbol s) {
       strcpy(param_type_str, "BYREF");
       break;
   }
-  printf("| %s  | VARIABLE | lexical_level: %d | offset: %d | type: %s | param: %s\n",
+  printf("| %s | PARAMETER | lexical_level: %d | offset: %d | type: %s | param: %s\n",
             s.identifier, s.values.parameter.lexical_level, s.values.parameter.offset, 
             var_type_str, param_type_str);
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "tabela_simbolos.h"
 
 int main() {
@@ -17,15 +18,27 @@ int main() {
   insert_table(table, new_symbol);
 
   new_symbol.values.variable.offset = 1;
+  strcpy(new_symbol.identifier, "var2");
   insert_table(table, new_symbol);
 
   new_symbol.category = PARAMETER;
+  strcpy(new_symbol.identifier, "parametro_test");
   new_symbol.values.parameter.lexical_level= 0;
   new_symbol.values.parameter.offset= 2;
   new_symbol.values.parameter.variable_type = UNDEFINED;
   new_symbol.values.parameter.parameter_type = BYVAL;
   insert_table(table, new_symbol);
 
+  print_table(table);
+  
+  printf("Testing search_table...\n");
+  assert(search_table(table, "Teste") == 0);
+  assert(search_table(table, "var2") == 1);
+  assert(search_table(table, "parametro_test") == 2);
+  assert(search_table(table, "undefined_var") == -1);
+
+  remove_table(table);
+  remove_table(table);
   print_table(table);
   free_table(table);
 }

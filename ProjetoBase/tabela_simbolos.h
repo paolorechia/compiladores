@@ -21,8 +21,14 @@ typedef union level {
     int lexical_level;
     short label;
     short list_size;
-    void * parameter_list_pointer;
+    void * parameter_list;
   } procedure;
+  struct function {
+    int lexical_level;
+    short label;
+    short list_size;
+    void * parameter_return_list;
+  } function;
 } symbol_union;
 
 
@@ -42,7 +48,7 @@ typedef struct {
 symbol_table * malloc_table(int table_size);
 void free_table(symbol_table * table);
 int insert_table(symbol_table * table, symbol new_symbol);
-int remove_table(symbol_table * table, int symbol_index);
+int remove_table(symbol_table * table);
 int search_table(symbol_table * table, char id[TAM_TOKEN]);
 void print_table(symbol_table * table);
 void print_variable_symbol(symbol s);
