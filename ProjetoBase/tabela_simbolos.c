@@ -155,13 +155,10 @@ int remove_table(symbol_table * table, int number_to_remove){
   }
   int i; 
   int idx = table->idx;
-  for (i = idx; i > (table->idx - number_to_remove); i--) {
-    if (table->symbols[i].category = PROCEDURE) {
-      printf("List size: %d\n", table->symbols[i].values.procedure.parameter_list->size);
-//      l_print(table->symbols[i].values.procedure.parameter_list);
-//      l_free(table->symbols[i].values.procedure.parameter_list);
+  for (i = idx; i >= (table->idx - number_to_remove); i--) {
+    if (table->symbols[i].category == PROCEDURE) {
+      l_free(table->symbols[i].values.procedure.parameter_list);
     }
-    printf("%d\n", i);
   }
   if (table->idx > -1) {
     table->idx -= number_to_remove;
@@ -196,7 +193,7 @@ void print_table(symbol_table * table) {
           print_parameter_symbol(table->symbols[i]);
           break;
         case PROCEDURE:
-          //print_procedure_symbol(table->symbols[i]);
+          print_procedure_symbol(table->symbols[i]);
           break;
       }
   }
@@ -259,8 +256,8 @@ void print_procedure_symbol(symbol s) {
     char current_param[96];
     char params_string[2048];
     strcpy(params_string, "( ");
-    tnode * node = parameter_list->node->nxt;
-    while (node){
+    tnode * node = parameter_list->node;
+    while (node->nxt != NULL){
       node = node->nxt;
       switch(node->variable_type) {
         case INTEGER:
@@ -284,7 +281,7 @@ void print_procedure_symbol(symbol s) {
       sprintf(current_param, "VarType: %s, ParamType: %s; ", var_type_str, param_type_str);
       strcat(params_string, current_param);
     }
-    strcat(params_string, " )");
+    strcat(params_string, ")");
     printf("| %s | PROCEDURE | lexical_level: %d | label: %d | params: %s\n",
               s.identifier, s.values.procedure.lexical_level, s.values.procedure.label, 
               params_string);
