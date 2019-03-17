@@ -37,8 +37,7 @@ int main() {
   assert(search_table(table, "parametro_test") == 2);
   assert(search_table(table, "undefined_var") == -1);
 
-  remove_table(table);
-  remove_table(table);
+  remove_table(table, 2);
   print_table(table);
   free_table(table);
 }

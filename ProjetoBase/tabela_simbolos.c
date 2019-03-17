@@ -3,6 +3,95 @@
 #include <string.h>
 #include "tabela_simbolos.h"
 
+
+/* Linked List functions */
+thead * l_init(){
+    thead * head = malloc(sizeof(thead));
+    head->node = malloc(sizeof(tnode));
+    head->node->nxt = NULL;
+    head->size = 0;
+    return head;
+}
+void l_insert(thead * head, VariableType var_type, ParameterType param_type) {
+    tnode * node = head->node;
+    while (node->nxt != NULL){
+        node = node -> nxt;
+    }
+    node->nxt=malloc(sizeof(tnode));
+    node->nxt->variable_type = var_type;
+    node->nxt->parameter_type = param_type;
+    node->nxt->nxt=NULL;
+    head->size += 1;
+    return;
+}
+void l_print(thead * head){
+    if (head->node->nxt == NULL){
+        printf("Empty l\n");
+        return;
+    }
+    tnode * node = head->node->nxt;
+    while (node){
+        print_node(node);
+        node = node->nxt;
+    }
+}
+
+void print_node(tnode * node) {
+  char type_str[32];
+  char param_str[32];
+  switch(node->key->variable_type):
+    case INTEGER:
+      strcpy(type_str, "INTEGER");
+      break;
+    case BOOLEAN:
+      strcpy(type_str, "BOOLEAN");
+      break;
+    case UNDEFINED:
+      strcpy(type_str, "UNDEFINED");
+      break;
+
+  switch(node->key->parameter_type):
+    case BYVAL:
+      strcpy(type_str, "BYVAL");
+      break;
+    case BYREFERENCE:
+      strcpy(type_str, "BYREFERENCE");
+      break;
+  printf("VariableType: %s; ParameterType: %s\n", type_str, param_str);
+}
+
+int l_size(thead * head){
+    return head->size;
+}
+
+/* Recursive node free function */
+int rec_clear(tnode * node){
+    if (node->nxt != NULL){
+        rec_clear(node->nxt);
+    }
+//    printf("Freeing node of name: %s\n", node->key);
+    node->nxt = NULL;
+    free(node);
+}
+int l_clear(thead * head){
+    tnode * node = head->node;
+    if (head->node->nxt == NULL){
+        return 0;
+    }
+    rec_clear(head->node->nxt);
+    head->node->nxt = NULL;
+    head->size = 0;
+}
+void l_free(thead *head){
+    l_clear(head);
+    free(head->node);
+    free(head);
+}
+
+
+
+
+/* Symbol Table functions */
 symbol_table * malloc_table(int table_max_size) {
   symbol_table * table = (symbol_table * ) malloc(sizeof(symbol_table));
   table->max_size = table_max_size;
@@ -37,9 +126,12 @@ int insert_table(symbol_table * table, symbol new_symbol){
   return 0;
 }
 
-int remove_table(symbol_table * table){
+int remove_table(symbol_table * table, int number_to_remove){
+  if (number_to_remove <= 0 || number_to_remove > table->idx + 1) {
+    return -2; 
+  }
   if (table->idx > -1) {
-    table->idx--;
+    table->idx -= number_to_remove;
     return 0;
   }
   return -1;
