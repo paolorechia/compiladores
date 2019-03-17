@@ -46,3 +46,4 @@ int remove_table(symbol_table * table, int symbol_index);
 int search_table(symbol_table * table, char id[TAM_TOKEN]);
 void print_table(symbol_table * table);
 void print_variable_symbol(symbol s);
+void print_parameter_symbol(symbol s);
