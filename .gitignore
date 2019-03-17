@@ -1,6 +1,7 @@
 ProjetoBase/MEPA
 *vagrant
 compilador
+tabela_simbolos_test
 compilador.o
 *.tab.c
 *.tab.h

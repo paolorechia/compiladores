@@ -2,7 +2,7 @@
 
 
 typedef enum CategoryType {VARIABLE, FUNCTION, PROCEDURE, PARAMETER} CategoryType;
-typedef enum VariableType {INTEGER, BOOLEAN} VariableType;
+typedef enum VariableType {INTEGER, BOOLEAN, UNDEFINED} VariableType;
 typedef enum ParameterType {BYVAL, BYREFERENCE} ParameterType;
 
 typedef union level {
@@ -23,18 +23,26 @@ typedef union level {
     short list_size;
     void * parameter_list_pointer;
   } procedure;
-} SymbolUnion;
+} symbol_union;
 
 
 typedef struct {
   char identifier[TAM_TOKEN];
   CategoryType category; 
-  SymbolUnion values; 
-} Symbol;
+  symbol_union values; 
+} symbol;
+
+typedef struct {
+  int idx;
+  int max_size;
+  symbol * symbols;
+} symbol_table;
 
 
-int insert_table(Symbol * table, Symbol new_symbol);
-int remove_table(Symbol * table, int symbol_index);
-int search_table(Symbol * table, char id[TAM_TOKEN]);
-int malloc_table(Symbol * table, int table_size);
-void free_table(Symbol * table);
+symbol_table * malloc_table(int table_size);
+void free_table(symbol_table * table);
+int insert_table(symbol_table * table, symbol new_symbol);
+int remove_table(symbol_table * table, int symbol_index);
+int search_table(symbol_table * table, char id[TAM_TOKEN]);
+void print_table(symbol_table * table);
+void print_variable_symbol(symbol s);
