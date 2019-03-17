@@ -29,6 +29,17 @@ int main() {
   new_symbol.values.parameter.parameter_type = BYVAL;
   insert_table(table, new_symbol);
 
+  new_symbol.category = PROCEDURE;
+  strcpy(new_symbol.identifier, "meu_procedure");
+  new_symbol.values.procedure.lexical_level = 1;
+  new_symbol.values.procedure.label = 1;
+  new_symbol.values.procedure.parameter_list = l_init();
+  l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYVAL);
+  l_insert(new_symbol.values.procedure.parameter_list, BOOLEAN, BYVAL);
+  l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYREFERENCE);
+
+  insert_table(table, new_symbol);
+  l_free(new_symbol.values.procedure.parameter_list);
   print_table(table);
   
   printf("Testing search_table...\n");
@@ -36,6 +47,7 @@ int main() {
   assert(search_table(table, "var2") == 1);
   assert(search_table(table, "parametro_test") == 2);
   assert(search_table(table, "undefined_var") == -1);
+
 
   remove_table(table, 2);
   print_table(table);

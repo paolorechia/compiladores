@@ -24,6 +24,21 @@ void l_insert(thead * head, VariableType var_type, ParameterType param_type) {
     head->size += 1;
     return;
 }
+
+// destination must be initialized and empty before calling l_copy
+int l_copy(thead * origin, thead * destination) {
+    if (origin->node->nxt == NULL || destination->size > 0){
+        return -1;
+    }
+    tnode * node = origin->node;
+    while (node->nxt != NULL){
+        node = node->nxt;
+        l_insert(destination, node->variable_type, node->parameter_type);
+    }
+    destination->size = origin->size;
+    return 0;
+}
+
 void l_print(thead * head){
     if (head->node->nxt == NULL){
         printf("Empty l\n");
@@ -36,10 +51,11 @@ void l_print(thead * head){
     }
 }
 
+
 void print_node(tnode * node) {
   char type_str[32];
   char param_str[32];
-  switch(node->key->variable_type):
+  switch(node->variable_type) {
     case INTEGER:
       strcpy(type_str, "INTEGER");
       break;
@@ -49,16 +65,19 @@ void print_node(tnode * node) {
     case UNDEFINED:
       strcpy(type_str, "UNDEFINED");
       break;
-
-  switch(node->key->parameter_type):
+  }
+  switch(node->parameter_type) {
     case BYVAL:
-      strcpy(type_str, "BYVAL");
+      strcpy(param_str, "BYVAL");
       break;
     case BYREFERENCE:
-      strcpy(type_str, "BYREFERENCE");
+      strcpy(param_str, "BYREFERENCE");
       break;
+  }
+
   printf("VariableType: %s; ParameterType: %s\n", type_str, param_str);
 }
+
 
 int l_size(thead * head){
     return head->size;
@@ -87,9 +106,6 @@ void l_free(thead *head){
     free(head->node);
     free(head);
 }
-
-
-
 
 /* Symbol Table functions */
 symbol_table * malloc_table(int table_max_size) {
@@ -122,13 +138,30 @@ int insert_table(symbol_table * table, symbol new_symbol){
       saved_symbol->values.parameter.variable_type = new_symbol.values.parameter.variable_type;
       saved_symbol->values.parameter.parameter_type= new_symbol.values.parameter.parameter_type;
       break;
+    case PROCEDURE:
+      saved_symbol->values.procedure.lexical_level = new_symbol.values.procedure.lexical_level;
+      saved_symbol->values.procedure.label = new_symbol.values.procedure.label;
+      saved_symbol->values.procedure.parameter_list = l_init(); 
+      l_copy(new_symbol.values.procedure.parameter_list, saved_symbol->values.procedure.parameter_list);
   }
   return 0;
 }
 
+
+// fix list memory list here
 int remove_table(symbol_table * table, int number_to_remove){
   if (number_to_remove <= 0 || number_to_remove > table->idx + 1) {
     return -2; 
+  }
+  int i; 
+  int idx = table->idx;
+  for (i = idx; i > (table->idx - number_to_remove); i--) {
+    if (table->symbols[i].category = PROCEDURE) {
+      printf("List size: %d\n", table->symbols[i].values.procedure.parameter_list->size);
+//      l_print(table->symbols[i].values.procedure.parameter_list);
+//      l_free(table->symbols[i].values.procedure.parameter_list);
+    }
+    printf("%d\n", i);
   }
   if (table->idx > -1) {
     table->idx -= number_to_remove;
@@ -161,6 +194,9 @@ void print_table(symbol_table * table) {
           break;
         case PARAMETER:
           print_parameter_symbol(table->symbols[i]);
+          break;
+        case PROCEDURE:
+          //print_procedure_symbol(table->symbols[i]);
           break;
       }
   }
@@ -213,5 +249,45 @@ void print_parameter_symbol(symbol s) {
   printf("| %s | PARAMETER | lexical_level: %d | offset: %d | type: %s | param: %s\n",
             s.identifier, s.values.parameter.lexical_level, s.values.parameter.offset, 
             var_type_str, param_type_str);
+}
+
+void print_procedure_symbol(symbol s) {
+  thead * parameter_list = s.values.procedure.parameter_list;
+  if (parameter_list->size > 0) {
+    char var_type_str[32];
+    char param_type_str[32];
+    char current_param[96];
+    char params_string[2048];
+    strcpy(params_string, "( ");
+    tnode * node = parameter_list->node->nxt;
+    while (node){
+      node = node->nxt;
+      switch(node->variable_type) {
+        case INTEGER:
+          strcpy(var_type_str, "INTEGER");
+          break;
+        case BOOLEAN:
+          strcpy(var_type_str, "BOOLEAN");
+          break;
+        case UNDEFINED:
+          strcpy(var_type_str, "UNDEFINED");
+          break;
+      }
+      switch(node->parameter_type) {
+        case BYVAL:
+          strcpy(param_type_str, "BYVAL");
+          break;
+        case BYREFERENCE:
+          strcpy(param_type_str, "BYREF");
+          break;
+      }
+      sprintf(current_param, "VarType: %s, ParamType: %s; ", var_type_str, param_type_str);
+      strcat(params_string, current_param);
+    }
+    strcat(params_string, " )");
+    printf("| %s | PROCEDURE | lexical_level: %d | label: %d | params: %s\n",
+              s.identifier, s.values.procedure.lexical_level, s.values.procedure.label, 
+              params_string);
+    }
 }
 
