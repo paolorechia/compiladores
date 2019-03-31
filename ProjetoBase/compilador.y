@@ -29,7 +29,7 @@ char temp_str[TAM_TOKEN];
 %token MENOR MAIOR IGUAL
 %token IF NUMERO
 %token MAIS MENOS ASTERICO BARRA
-%token AND OR
+%token AND OR TRUE FALSE
 
 %%
 
@@ -100,8 +100,8 @@ lista_idents: lista_idents VIRGULA IDENT
 
 atribuicao: variavel 
             DOIS_PONTOS_IGUAL 
-            expr 
-            PONTO_E_VIRGULA;
+            expr { /* Gera sequencia de operacoes, confere tipos */ }
+            PONTO_E_VIRGULA { /* Desempilha endereco de memoria e gera ARMZ */ }
 
 
 expr: expr MAIS termo { geraCodigo(NULL, "SOMA"); } |
@@ -116,7 +116,7 @@ termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
 
 fator: fator ASTERICO num {  geraCodigo(NULL, "MULT"); } |
        fator AND num {  geraCodigo(NULL, "CONJ"); } |
-       num
+       num | boolean
 ;
 
 num: NUMERO { sprintf(temp_str, "CRCT %s", token); geraCodigo(NULL, temp_str); }
@@ -131,7 +131,9 @@ comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
 
 comando_sem_rotulo: atribuicao
 
-variavel: IDENT
+variavel: IDENT { /*Procura variavel na tabela de simbolos e empilha endereco? */ }
+
+boolean: TRUE | FALSE
 
 
 %%

@@ -361,7 +361,7 @@ int insert_variable(symbol_table * table, char * identifier, int lexical_level, 
   return offset;
 }
 
-int update_var_type(symbol_table * table, char * token) {
+int parse_var_type(char * token) {
   char parsed_token[TAM_TOKEN];
   char * pter = parsed_token;
   char * ch = token;
@@ -389,6 +389,14 @@ int update_var_type(symbol_table * table, char * token) {
     printf("ERROR: Invalid variable type: %s!!! Must be either integer or boolean\n", token);
     return -1;
   }
+  return var_type;
+}
+
+int update_var_type(symbol_table * table, char * token) {
+  VariableType var_type = (VariableType) parse_var_type(token);
+  if (var_type == - 1) {
+    return -1;
+  }
   int updated_variables = 0;
   int idx = table->idx;
   symbol * current_symbol; 
@@ -401,4 +409,5 @@ int update_var_type(symbol_table * table, char * token) {
   }
   return updated_variables;
 }
+
 

@@ -160,6 +160,18 @@ or { simbolo = simb_or;
           return OR;
  }
 
+true { simbolo = simb_true;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" and ");
+          return TRUE;
+ }
+
+false { simbolo = simb_false;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" false ");
+          return FALSE;
+ }
+
 if  { simbolo = simb_if;  
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" if ");
