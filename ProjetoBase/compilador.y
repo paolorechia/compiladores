@@ -55,7 +55,7 @@ bloco       :
               { 
               }
 
-              comando_composto 
+              comando_composto
               ;
 
 
@@ -137,9 +137,9 @@ num: NUMERO { sprintf(temp_str, "CRCT %s", token);
             }
 ;
 
-comando_composto: T_BEGIN comandos T_END 
+comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END
 
-comandos: comandos comando | comando |
+comandos: comandos comando | comando
 ;
 
 comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
