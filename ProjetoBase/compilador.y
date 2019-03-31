@@ -10,6 +10,7 @@
 #include <string.h>
 #include "compilador.h"
 #include "tabela_simbolos.h"
+#include "pilhas_auxiliares.h"
 
 int num_vars;
 int lexical_level = 0;
@@ -17,6 +18,7 @@ int offset = 0;
 
 symbol new_symbol;
 symbol_table * table;
+tvar_type_stack var_type_stack;
 
 extern char * yytext;
 char temp_str[TAM_TOKEN];
@@ -116,7 +118,8 @@ termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
 
 fator: fator ASTERICO num {  geraCodigo(NULL, "MULT"); } |
        fator AND num {  geraCodigo(NULL, "CONJ"); } |
-       num | boolean
+       num { push_type_stack(&var_type_stack, INTEGER); } | 
+       boolean { push_type_stack(&var_type_stack, BOOLEAN); } 
 ;
 
 num: NUMERO { sprintf(temp_str, "CRCT %s", token); geraCodigo(NULL, temp_str); }
@@ -158,13 +161,15 @@ main (int argc, char** argv) {
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
 
-   table  = malloc_table(MAX_TABLE_SIZE);
+   table = malloc_table(MAX_TABLE_SIZE);
    symbol new_symbol;
+   init_type_stack(&var_type_stack);
 
    yyin=fp;
    yyparse();
 
   
+   print_type_stack(&var_type_stack);
    print_table(table);
    free_table(table);
    return 0;
