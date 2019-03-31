@@ -25,6 +25,8 @@ char label[LABEL_MAX_SIZE];
 char * label_pter;
 char * label_pter2;
 
+char last_instruction[TAM_TOKEN];
+
 symbol new_symbol;
 symbol * symb_pter;
 symbol_table * table;
@@ -166,16 +168,18 @@ atribuicao: variavel
               ;
 
 expr: expressao_simples | expr relacao expressao_simples {
-                          /* Gerar instrucao de comparacao aqui! */ }
+                          /* Gerar instrucao de comparacao aqui! */
+                          geraCodigo(NULL, last_instruction);
+                           }
 ;
 
 
-relacao: IGUAL { geraCodigo(NULL, "CMIG"); } |
-         MENOR { geraCodigo(NULL, "CMME"); } |
-         MAIOR { geraCodigo(NULL, "CMMA"); } |
-         MENOR IGUAL { geraCodigo(NULL, "CMEG"); } |
-         MAIOR IGUAL { geraCodigo(NULL, "CMAG"); } |
-         MENOR MAIOR { geraCodigo(NULL, "CMDG"); } // diferente
+relacao: IGUAL { sprintf(last_instruction, "CMIG"); } |
+         MENOR { sprintf(last_instruction, "CMME"); } |
+         MAIOR { sprintf(last_instruction, "CMMA"); } |
+         MENOR IGUAL { sprintf(last_instruction, "CMEG"); } |
+         MAIOR IGUAL { sprintf(last_instruction, "CMAG"); } |
+         MENOR MAIOR { sprintf(last_instruction, "CMDG"); } // diferente
 ;
 
 
