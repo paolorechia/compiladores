@@ -72,7 +72,7 @@ int rec_clear(tnode * node);
 int l_clear(thead * head);
 void l_free(thead * head);
 
-/* Symbol table functions */
+/* Symbol table basic functions */
 symbol_table * malloc_table(int table_size);
 void free_table(symbol_table * table);
 int insert_table(symbol_table * table, symbol new_symbol);
@@ -84,10 +84,11 @@ void print_parameter_symbol(symbol s);
 void print_procedure_symbol(symbol s);
 void print_function_symbol(symbol s);
 
-/* Symbol token functions / higher-level functions */
+/* Symbol token functions / table higher-level functions */
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
 int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
-int compute_main_dmem(symbol_table * table);
+int remove_local_vars(symbol_table * table);
+symbol * find_identifier(symbol_table * table, char * identifier);
 
 #endif /*TABELA_SIMBOLOS_H*/

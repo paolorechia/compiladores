@@ -46,3 +46,31 @@ void print_type_stack(tvar_type_stack * type_stack) {
     idx--;
   }
 }
+
+void init_symbol_stack(tsymbol_stack * symbol_stack) {
+  symbol_stack->idx = 0;
+}
+
+int push_symbol_stack(tsymbol_stack * symbol_stack, symbol symbol) {
+  symbol_stack->idx++;
+  if (symbol_stack->idx > MAX_STACK_SIZE) {
+    printf("Type stack is full, too bad! Something probably went wrong...\n");
+    return -1;
+  }
+  symbol_stack->A[symbol_stack->idx] = symbol; 
+  return 0;
+}
+
+symbol * pop_symbol_stack(tsymbol_stack * symbol_stack) {
+  if (symbol_stack->idx <= 0) {
+    printf("Type stack is empty!\n");
+    return NULL;
+  }
+  symbol symbol = symbol_stack->A[symbol_stack->idx];
+  symbol_stack->idx--;
+  return &(symbol_stack->A[symbol_stack->idx + 1]);
+}
+
+void print_symbol_stack(tsymbol_stack * symbol_stack) {
+  printf("NOT IMPLEMENTED!\n");
+}

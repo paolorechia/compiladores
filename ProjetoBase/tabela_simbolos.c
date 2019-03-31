@@ -424,4 +424,13 @@ int remove_local_vars(symbol_table * table) {
   return removed_vars;
 }
 
+symbol * find_identifier(symbol_table * table, char * identifier) {
+  int idx = search_table(table, identifier);
+  if (idx == -1) {
+    printf("ERROR: Symbol %s could not be found! Double check if it has been declared!\n", identifier);
+    return NULL;
+  }
+  return &(table->symbols[idx]);
+}
+
 

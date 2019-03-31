@@ -17,8 +17,10 @@ int lexical_level = 0;
 int offset = 0;
 
 symbol new_symbol;
+symbol * symb_pter;
 symbol_table * table;
 tvar_type_stack var_type_stack;
+tsymbol_stack symbol_stack;
 VariableType t1;
 VariableType t2;
 
@@ -43,6 +45,7 @@ programa    :{
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
+             print_table(table);
              num_vars = remove_local_vars(table);
              sprintf(temp_str, "DMEM %d", num_vars);
              geraCodigo (NULL, temp_str);
@@ -107,7 +110,13 @@ lista_idents: lista_idents VIRGULA IDENT
 atribuicao: variavel 
             DOIS_PONTOS_IGUAL 
             expr { /* Gera sequencia de operacoes, confere tipos */ }
-            PONTO_E_VIRGULA { /* Desempilha endereco de memoria e gera ARMZ */ }
+            PONTO_E_VIRGULA {
+              /* Desempilha endereco de memoria e gera ARMZ */ 
+                symb_pter = pop_symbol_stack(&symbol_stack);
+                sprintf(temp_str, "ARMZ %d, %d", symb_pter->values.variable.lexical_level,
+                                                 symb_pter->values.variable.offset);
+                geraCodigo(NULL, temp_str);
+              }
 
 expr: expressao_simples | relacao expressao_simples
 
@@ -146,9 +155,25 @@ comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
 
 comando_sem_rotulo: atribuicao
 
-variavel: IDENT { /*Procura variavel na tabela de simbolos e empilha endereco? */ }
+variavel: IDENT { 
+  /*Procura variavel na tabela de simbolos e empilha endereco? */ 
+    symb_pter = find_identifier(table, token); 
+    if (symb_pter != NULL) {
+      push_symbol_stack(&symbol_stack, *symb_pter);
+    } else {
+      // bad things happened
+    }
+  }
 
-elemento: num | boolean | variavel
+elemento: num | 
+          boolean | 
+          variavel {
+          /* Desempilha endereco da memoria da pilha */
+          symb_pter = pop_symbol_stack(&symbol_stack);
+          sprintf(temp_str, "CRVL %d, %d", symb_pter->values.variable.lexical_level,
+                                           symb_pter->values.variable.offset);
+          geraCodigo(NULL, temp_str);
+          } 
 
 boolean: TRUE { geraCodigo(NULL, "CRCT 1");
                 push_type_stack(&var_type_stack, BOOLEAN); 
@@ -190,7 +215,6 @@ main (int argc, char** argv) {
 
   
    print_type_stack(&var_type_stack);
-   print_table(table);
    free_table(table);
    return 0;
 }
