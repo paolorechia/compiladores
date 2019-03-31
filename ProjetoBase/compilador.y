@@ -162,7 +162,8 @@ lista_leitura: lista_leitura VIRGULA variavel {
 escrita: WRITE ABRE_PARENTESES lista_escrita FECHA_PARENTESES PONTO_E_VIRGULA
 ;
 
-lista_escrita: lista_escrita VIRGULA IDENT | IDENT
+lista_escrita: lista_escrita VIRGULA elemento { geraCodigo(NULL, "IMPR"); }
+              | elemento { geraCodigo(NULL, "IMPR"); }
 
 comando_condicional: if_then {
                 label_pter = pop_label_stack(&label_stack); 
