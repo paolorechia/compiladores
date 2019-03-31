@@ -117,7 +117,7 @@ termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
 ;
 
 fator: fator ASTERICO num {  geraCodigo(NULL, "MULT"); } |
-       fator AND num {  geraCodigo(NULL, "CONJ"); } |
+       fator AND boolean {  geraCodigo(NULL, "CONJ"); } |
        num { push_type_stack(&var_type_stack, INTEGER); } | 
        boolean { push_type_stack(&var_type_stack, BOOLEAN); } 
 ;
