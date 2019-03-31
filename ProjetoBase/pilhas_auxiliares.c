@@ -74,3 +74,51 @@ symbol * pop_symbol_stack(tsymbol_stack * symbol_stack) {
 void print_symbol_stack(tsymbol_stack * symbol_stack) {
   printf("NOT IMPLEMENTED!\n");
 }
+
+void init_label_stack(tlabel_stack * label_stack) {
+  label_stack->idx = 0;
+}
+int push_label_stack(tlabel_stack * label_stack, char * label) {
+  label_stack->idx++;
+  if (label_stack->idx > MAX_STACK_SIZE) {
+    printf("Type stack is full, too bad! Something probably went wrong...\n");
+    return -1;
+  }
+  strncpy(label_stack->A[label_stack->idx], label, LABEL_MAX_SIZE);
+  return 0;
+}
+
+char * pop_label_stack(tlabel_stack * label_stack) {
+  label_stack->idx--;
+  return (char * )&(label_stack->A[label_stack->idx + 1]);
+}
+
+char * peek_label_stack(tlabel_stack * label_stack) {
+  return (char * )&(label_stack->A[label_stack->idx]);
+}
+
+void print_label_stack(tlabel_stack * label_stack) {
+  printf("NOT IMPLEMENTED\n");
+}
+
+int increment_label_counter(int count) {
+  return ++count;
+}
+
+// Must pass a pointer to a buffer with minimum size (defined elsewhere)
+void generate_label(int  * counter, char * dest_str) {
+  char buffer[LABEL_MAX_SIZE];
+  /*
+  if (*counter < 10) {
+    sprintf(buffer, "R00%d", *counter);
+  } else 
+  */
+  if ( *counter < 100) {
+    sprintf(buffer, "R0%d", *counter);
+  }
+  else {
+    sprintf(buffer, "R%d", *counter);
+  }
+  strncpy(dest_str, buffer, LABEL_MAX_SIZE);
+  *counter = increment_label_counter(*counter);
+}

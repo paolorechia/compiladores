@@ -20,12 +20,18 @@
 int num_vars;
 int lexical_level = 0;
 int offset = 0;
+int label_counter = 0;
+char label[LABEL_MAX_SIZE];
+char * label_pter;
+char * label_pter2;
 
 symbol new_symbol;
 symbol * symb_pter;
 symbol_table * table;
 tvar_type_stack var_type_stack;
 tsymbol_stack symbol_stack;
+tlabel_stack label_stack;
+
 VariableType t1;
 VariableType t2;
 
@@ -38,7 +44,7 @@ char temp_str[TAM_TOKEN];
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO 
 %token T_BEGIN T_END VAR IDENT DOIS_PONTOS_IGUAL
 %token MENOR MAIOR IGUAL
-%token IF NUMERO
+%token IF WHILE DO NUMERO
 %token MAIS MENOS ASTERICO BARRA
 %token AND OR TRUE FALSE
 
@@ -120,9 +126,31 @@ comandos: comandos comando | comando
 comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
 ;
 
-comando_sem_rotulo: atribuicao
+comando_sem_rotulo: atribuicao | comando_repetitivo
 ;
 
+comando_repetitivo: WHILE { 
+                            generate_label(&label_counter, (char * )label);
+                            geraCodigo(label, "NADA");
+                            push_label_stack(&label_stack, label);
+                            generate_label(&label_counter, (char * )label);
+                            push_label_stack(&label_stack, label);
+                            }
+                    expr { 
+                            label_pter = peek_label_stack(&label_stack); 
+                            sprintf(temp_str, "DSVF %s", label_pter);
+                            geraCodigo(NULL, temp_str);
+                         }
+                    DO
+                    comando_composto { }
+                    PONTO_E_VIRGULA { 
+                      label_pter2 = pop_label_stack(&label_stack);
+                      label_pter = pop_label_stack(&label_stack);
+                      sprintf(temp_str, "DSVS %s", label_pter);
+                      geraCodigo(NULL, temp_str);
+                      geraCodigo(label_pter2, "NADA");
+                    }
+;
 
 atribuicao: variavel 
             DOIS_PONTOS_IGUAL 
@@ -137,7 +165,8 @@ atribuicao: variavel
               }
               ;
 
-expr: expressao_simples | expr relacao expressao_simples
+expr: expressao_simples | expr relacao expressao_simples {
+                          /* Gerar instrucao de comparacao aqui! */ }
 ;
 
 

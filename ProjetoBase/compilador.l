@@ -177,6 +177,18 @@ if  { simbolo = simb_if;
           IMPRIME(" if ");
           return IF;
  }
+ 
+do  { simbolo = simb_do;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" do ");
+          return DO;
+ }
+
+while  { simbolo = simb_while;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" while ");
+          return WHILE;
+ }
 
 {numero} { simbolo = simb_numero;
               strncpy(token, yytext, TAM_TOKEN);

@@ -433,4 +433,3 @@ symbol * find_identifier(symbol_table * table, char * identifier) {
   return &(table->symbols[idx]);
 }
 
-
