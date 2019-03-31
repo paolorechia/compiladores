@@ -138,9 +138,15 @@ comando_sem_rotulo: atribuicao |
                     comando_condicional
 ;
 
-comando_condicional: if_then cond_else {
-              label_pter = pop_label_stack(&label_stack);
-              geraCodigo(label_pter, "NADA");
+comando_condicional: if_then {
+                label_pter = pop_label_stack(&label_stack); 
+                label_pter2 = pop_label_stack(&label_stack); 
+                geraCodigo(label_pter2, "NADA");
+                push_label_stack(&label_stack, label_pter);
+              }
+              cond_else {
+                label_pter = pop_label_stack(&label_stack);
+                geraCodigo(label_pter, "NADA");
               }
 ;
 
@@ -161,12 +167,7 @@ if_then: IF expr {
          }
 ;
 
-cond_else: ELSE {
-            label_pter = pop_label_stack(&label_stack); 
-            label_pter2 = pop_label_stack(&label_stack); 
-            geraCodigo(label_pter2, "NADA");
-            push_label_stack(&label_stack, label_pter);
-           }
+cond_else: ELSE
            comando_sem_rotulo
            | %prec LOWER_THAN_ELSE
 
