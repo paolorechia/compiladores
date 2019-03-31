@@ -19,6 +19,8 @@ int offset = 0;
 symbol new_symbol;
 symbol_table * table;
 tvar_type_stack var_type_stack;
+VariableType t1;
+VariableType t2;
 
 extern char * yytext;
 char temp_str[TAM_TOKEN];
@@ -105,11 +107,17 @@ atribuicao: variavel
             expr { /* Gera sequencia de operacoes, confere tipos */ }
             PONTO_E_VIRGULA { /* Desempilha endereco de memoria e gera ARMZ */ }
 
+expr: expressao_simples | relacao expressao_simples
 
-expr: expr MAIS termo { geraCodigo(NULL, "SOMA"); } |
-      expr MENOS termo { geraCodigo(NULL, "SUBT"); } |
-      expr OR termo {geraCodigo(NULL, "DISJ"); } |
-      termo
+
+expressao_simples: expressao_simples MAIS termo { geraCodigo(NULL, "SOMA");
+                        t1 = pop_type_stack(&var_type_stack);
+                        t2 = pop_type_stack(&var_type_stack);
+                        printf("t1: %d, t2:%d\n", t1, t2);
+                      } |
+                  expressao_simples MENOS termo { geraCodigo(NULL, "SUBT"); } |
+                  expressao_simples OR termo {geraCodigo(NULL, "DISJ"); } |
+                  termo
 ;
 
 termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
@@ -117,12 +125,15 @@ termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
 ;
 
 fator: fator ASTERICO num {  geraCodigo(NULL, "MULT"); } |
-       fator AND boolean {  geraCodigo(NULL, "CONJ"); } |
-       num { push_type_stack(&var_type_stack, INTEGER); } | 
-       boolean { push_type_stack(&var_type_stack, BOOLEAN); } 
+       fator AND boolean { geraCodigo(NULL, "CONJ"); } |
+       fator AND variavel { geraCodigo(NULL, "CONJ"); } |
+       num | boolean | variavel
 ;
 
-num: NUMERO { sprintf(temp_str, "CRCT %s", token); geraCodigo(NULL, temp_str); }
+num: NUMERO { sprintf(temp_str, "CRCT %s", token); 
+              push_type_stack(&var_type_stack, INTEGER);
+              geraCodigo(NULL, temp_str);
+            }
 ;
 
 comando_composto: T_BEGIN comandos T_END 
@@ -136,8 +147,14 @@ comando_sem_rotulo: atribuicao
 
 variavel: IDENT { /*Procura variavel na tabela de simbolos e empilha endereco? */ }
 
-boolean: TRUE | FALSE
+boolean: TRUE { geraCodigo(NULL, "CRCT 1");
+                push_type_stack(&var_type_stack, BOOLEAN); 
+              } |
+         FALSE { geraCodigo(NULL, "CRCT 0");
+                 push_type_stack(&var_type_stack, BOOLEAN);
+               }
 
+relacao: IGUAL | MENOR MAIOR | MENOR | MENOR IGUAL | MAIOR | MAIOR IGUAL
 
 %%
 
