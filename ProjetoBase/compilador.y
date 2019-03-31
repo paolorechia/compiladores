@@ -51,6 +51,7 @@ char temp_str[TAM_TOKEN];
 %token IF WHILE DO THEN ELSE NUMERO
 %token MAIS MENOS ASTERICO BARRA
 %token AND OR TRUE FALSE
+%token READ WRITE
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE 
@@ -135,8 +136,33 @@ comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
 
 comando_sem_rotulo: atribuicao |
                     comando_repetitivo |
-                    comando_condicional
+                    comando_condicional |
+                    leitura |
+                    escrita
 ;
+
+leitura: READ ABRE_PARENTESES lista_leitura FECHA_PARENTESES PONTO_E_VIRGULA
+;
+
+lista_leitura: lista_leitura VIRGULA variavel { 
+                    symb_pter = pop_symbol_stack(&symbol_stack);
+                    geraCodigo(NULL, "LEIT");
+                    sprintf(temp_str, "ARMZ %d, %d", symb_pter->values.variable.lexical_level,
+                                                     symb_pter->values.variable.offset);
+                    geraCodigo(NULL, temp_str);
+                    } 
+                    | variavel {
+                      symb_pter = pop_symbol_stack(&symbol_stack);
+                      geraCodigo(NULL, "LEIT");
+                      sprintf(temp_str, "ARMZ %d, %d", symb_pter->values.variable.lexical_level,
+                                                       symb_pter->values.variable.offset);
+                      geraCodigo(NULL, temp_str);
+                    } 
+
+escrita: WRITE ABRE_PARENTESES lista_escrita FECHA_PARENTESES PONTO_E_VIRGULA
+;
+
+lista_escrita: lista_escrita VIRGULA IDENT | IDENT
 
 comando_condicional: if_then {
                 label_pter = pop_label_stack(&label_stack); 
