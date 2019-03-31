@@ -30,8 +30,9 @@ typedef enum simbolos {
   // Simbolos especiais e expressoes regulares
   simb_identificador, simb_numero,
   simb_ponto, simb_virgula, simb_ponto_e_virgula, simb_dois_pontos,
-  simb_atribuicao, simb_abre_parenteses, simb_fecha_parenteses,
-  simb_mais, simb_menos, simb_asterico, simb_barra
+  simb_dois_pontos_igual, simb_abre_parenteses, simb_fecha_parenteses,
+  simb_mais, simb_menos, simb_asterico, simb_barra, simb_maior,
+  simb_menor, simb_igual
 } simbolos;
 
 

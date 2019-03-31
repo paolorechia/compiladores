@@ -55,16 +55,17 @@ begin { simbolo = simb_begin;
           return T_BEGIN;
  }
 
+
 end { simbolo = simb_end;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME("end  ");
           return T_END;
  }
 
-:= { simbolo = simb_atribuicao;  
+:= { simbolo = simb_dois_pontos_igual;  
           strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" atribuicao  ");
-          return ATRIBUICAO;  
+          IMPRIME(" dois_pontos_igual ");
+          return DOIS_PONTOS_IGUAL;  
  }
 
 \; { simbolo = simb_ponto_e_virgula;  
@@ -73,10 +74,29 @@ end { simbolo = simb_end;
           return PONTO_E_VIRGULA;
  }
 
+
 \: { simbolo = simb_dois_pontos;  
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" dois pontos ");
           return DOIS_PONTOS;
+ }
+
+= { simbolo = simb_igual;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" simb_igual ");
+          return IGUAL;
+ }
+
+\> { simbolo = simb_maior;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" simb_maior");
+          return MAIOR;
+ }
+
+\< { simbolo = simb_menor;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" simb_menor");
+          return MENOR;
  }
 
 \, { simbolo = simb_virgula;  
@@ -126,6 +146,18 @@ end { simbolo = simb_end;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" barra ");
           return BARRA;
+ }
+
+and  { simbolo = simb_and;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" and ");
+          return AND;
+ }
+
+or { simbolo = simb_or;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" or ");
+          return OR;
  }
 
 if  { simbolo = simb_if;  

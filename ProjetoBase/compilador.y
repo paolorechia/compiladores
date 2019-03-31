@@ -24,10 +24,12 @@ char temp_str[TAM_TOKEN];
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES 
-%token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
-%token T_BEGIN T_END VAR IDENT ATRIBUICAO
+%token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO 
+%token T_BEGIN T_END VAR IDENT DOIS_PONTOS_IGUAL
+%token MENOR MAIOR IGUAL
 %token IF NUMERO
 %token MAIS MENOS ASTERICO BARRA
+%token AND OR
 
 %%
 
@@ -38,6 +40,7 @@ programa    :{
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
              geraCodigo (NULL, "PARA"); 
+             /* DMEM aqui? */
              }
 ;
 
@@ -95,14 +98,15 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 
-atribuicao: IDENT   
-            ATRIBUICAO 
+atribuicao: variavel 
+            DOIS_PONTOS_IGUAL 
             expr 
             PONTO_E_VIRGULA;
 
 
 expr: expr MAIS termo { geraCodigo(NULL, "SOMA"); } |
       expr MENOS termo { geraCodigo(NULL, "SUBT"); } |
+      expr OR termo {geraCodigo(NULL, "DISJ"); } |
       termo
 ;
 
@@ -111,6 +115,7 @@ termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
 ;
 
 fator: fator ASTERICO num {  geraCodigo(NULL, "MULT"); } |
+       fator AND num {  geraCodigo(NULL, "CONJ"); } |
        num
 ;
 
@@ -119,8 +124,14 @@ num: NUMERO { sprintf(temp_str, "CRCT %s", token); geraCodigo(NULL, temp_str); }
 
 comando_composto: T_BEGIN comandos T_END 
 
-comandos: atribuicao comandos |
+comandos: comandos comando | comando
 ;
+
+comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
+
+comando_sem_rotulo: atribuicao
+
+variavel: IDENT
 
 
 %%
