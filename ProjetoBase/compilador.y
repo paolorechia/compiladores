@@ -141,10 +141,34 @@ comando_sem_rotulo: atribuicao |
 comando_condicional: if_then cond_else {};
 ;
 
-if_then: IF expr {} THEN comando_sem_rotulo {}
+if_then: IF expr {
+            generate_label(&label_counter, (char * )label);
+            push_label_stack(&label_stack, label);
+            generate_label(&label_counter, (char * )label);
+            push_label_stack(&label_stack, label);
+            label_pter = peek_label_stack(&label_stack); 
+            sprintf(temp_str, "DSVF %s", label_pter);
+            geraCodigo(NULL, temp_str);
+         } 
+         THEN {
+         }
+         comando_sem_rotulo {
+            label_pter = peek_label_stack(&label_stack); 
+            sprintf(temp_str, "DSVS %s", label_pter);
+            geraCodigo(NULL, temp_str);
+         }
 ;
 
-cond_else: ELSE comando_sem_rotulo | %prec LOWER_THAN_ELSE
+cond_else: ELSE {
+            label_pter = pop_label_stack(&label_stack); 
+            geraCodigo(label_pter, "NADA");
+           }
+           comando_sem_rotulo
+           {
+            label_pter = pop_label_stack(&label_stack); 
+            geraCodigo(label_pter, "NADA");
+           }
+           | %prec LOWER_THAN_ELSE
 
 comando_repetitivo: WHILE { 
                             generate_label(&label_counter, (char * )label);
