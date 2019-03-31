@@ -68,7 +68,9 @@ declara_var : { }
               lista_id_var DOIS_PONTOS 
               tipo 
               { /* AMEM */
-                printf("AMEN %d\n", update_var_type(table, token));   
+                num_vars = update_var_type(table, token);
+                sprintf(temp_str, "AMEN %d", num_vars);
+                geraCodigo (NULL, temp_str); 
               }
               PONTO_E_VIRGULA
 ;
