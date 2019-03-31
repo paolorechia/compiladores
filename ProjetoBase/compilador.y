@@ -106,6 +106,18 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
+comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END
+;
+
+comandos: comandos comando | comando
+;
+
+comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
+;
+
+comando_sem_rotulo: atribuicao
+;
+
 
 atribuicao: variavel 
             DOIS_PONTOS_IGUAL 
@@ -117,8 +129,14 @@ atribuicao: variavel
                                                  symb_pter->values.variable.offset);
                 geraCodigo(NULL, temp_str);
               }
+              ;
 
 expr: expressao_simples | relacao expressao_simples
+;
+
+
+relacao: IGUAL | MENOR MAIOR | MENOR | MENOR IGUAL | MAIOR | MAIOR IGUAL
+;
 
 
 expressao_simples: expressao_simples MAIS termo { geraCodigo(NULL, "SOMA");
@@ -146,14 +164,6 @@ num: NUMERO { sprintf(temp_str, "CRCT %s", token);
             }
 ;
 
-comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END
-
-comandos: comandos comando | comando
-;
-
-comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
-
-comando_sem_rotulo: atribuicao
 
 variavel: IDENT { 
   /*Procura variavel na tabela de simbolos e empilha endereco? */ 
@@ -164,6 +174,7 @@ variavel: IDENT {
       // bad things happened
     }
   }
+  ;
 
 elemento: num | 
           boolean | 
@@ -174,6 +185,7 @@ elemento: num |
                                            symb_pter->values.variable.offset);
           geraCodigo(NULL, temp_str);
           } 
+          ;
 
 boolean: TRUE { geraCodigo(NULL, "CRCT 1");
                 push_type_stack(&var_type_stack, BOOLEAN); 
@@ -181,8 +193,8 @@ boolean: TRUE { geraCodigo(NULL, "CRCT 1");
          FALSE { geraCodigo(NULL, "CRCT 0");
                  push_type_stack(&var_type_stack, BOOLEAN);
                }
+               ;
 
-relacao: IGUAL | MENOR MAIOR | MENOR | MENOR IGUAL | MAIOR | MAIOR IGUAL
 
 %%
 
