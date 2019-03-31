@@ -11,6 +11,9 @@
  *
  * ------------------------------------------------------------------- */
 
+#ifndef COMPILADOR_H
+#define COMPILADOR_H
+
 #define TAM_TOKEN 16
 
 typedef enum simbolos { 
@@ -49,4 +52,4 @@ simbolos simbolo, relacao;
 char token[TAM_TOKEN];
 
 
-
+#endif

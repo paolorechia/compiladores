@@ -1,4 +1,9 @@
+#ifndef TABELA_SIMBOLOS_H
+#define TABELA_SIMBOLOS_H
+
 #include "compilador.h"
+
+#define MAX_TABLE_SIZE 1024
 
 typedef enum CategoryType {VARIABLE, FUNCTION, PROCEDURE, PARAMETER} CategoryType;
 typedef enum VariableType {INTEGER, BOOLEAN, UNDEFINED} VariableType;
@@ -78,3 +83,9 @@ void print_variable_symbol(symbol s);
 void print_parameter_symbol(symbol s);
 void print_procedure_symbol(symbol s);
 void print_function_symbol(symbol s);
+
+/* Symbol token functions */
+void insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
+
+
+#endif /*TABELA_SIMBOLOS_H*/

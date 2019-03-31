@@ -348,3 +348,14 @@ void print_function_symbol(symbol s) {
     }
 }
 
+
+void insert_variable(symbol_table * table, char * identifier, int lexical_level, int offset) {
+  symbol new_symbol;
+  new_symbol.category = VARIABLE;
+  strcpy(new_symbol.identifier, identifier);
+  new_symbol.values.variable.lexical_level = lexical_level;
+  new_symbol.values.variable.offset = offset;
+  new_symbol.values.variable.variable_type = UNDEFINED;
+  insert_table(table, new_symbol);
+}
+

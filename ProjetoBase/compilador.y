@@ -9,8 +9,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compilador.h"
+#include "tabela_simbolos.h"
 
 int num_vars;
+int lexical_level = 0;
+int offset = 0;
+
+symbol new_symbol;
+symbol_table * table;
+
 extern char * yytext;
 char temp_str[TAM_TOKEN];
 
@@ -69,8 +76,18 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT 
-              { /* insere última vars na tabela de símbolos */ }
-            | IDENT { /* insere vars na tabela de símbolos */}
+              { 
+                /* insere última vars na tabela de símbolos */ 
+                insert_variable(table, token, lexical_level, offset);
+                offset++;
+
+              }
+            | IDENT {
+                /* insere vars na tabela de símbolos */
+                insert_variable(table, token, lexical_level, offset);
+                offset++;
+//                sprintf(temp_str, "CRCT %s", token);   
+             }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT  
@@ -128,9 +145,15 @@ main (int argc, char** argv) {
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
 
+   table  = malloc_table(MAX_TABLE_SIZE);
+   symbol new_symbol;
+
    yyin=fp;
    yyparse();
 
+  
+   print_table(table);
+   free_table(table);
    return 0;
 }
 
