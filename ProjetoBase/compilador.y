@@ -12,6 +12,8 @@
 #include "tabela_simbolos.h"
 #include "pilhas_auxiliares.h"
 
+#define CHECK_TYPE 
+
 int num_vars;
 int lexical_level = 0;
 int offset = 0;
@@ -124,6 +126,7 @@ atribuicao: variavel
             expr { /* Gera sequencia de operacoes, confere tipos */ }
             PONTO_E_VIRGULA {
               /* Desempilha endereco de memoria e gera ARMZ */ 
+                if (type_check(&var_type_stack, nl) == -1) return -1;
                 symb_pter = pop_symbol_stack(&symbol_stack);
                 sprintf(temp_str, "ARMZ %d, %d", symb_pter->values.variable.lexical_level,
                                                  symb_pter->values.variable.offset);
@@ -139,20 +142,36 @@ relacao: IGUAL | MENOR MAIOR | MENOR | MENOR IGUAL | MAIOR | MAIOR IGUAL
 ;
 
 
-expressao_simples: expressao_simples MAIS termo { geraCodigo(NULL, "SOMA");
+expressao_simples: expressao_simples MAIS termo 
+                    { geraCodigo(NULL, "SOMA");
+                      if (type_check(&var_type_stack, nl) == -1) return -1;
+                    } |
+                  expressao_simples MENOS termo 
+                    { geraCodigo(NULL, "SUBT"); 
+                      if (type_check(&var_type_stack, nl) == -1) return -1;
+                    } |
+                  expressao_simples OR termo
+                    {geraCodigo(NULL, "DISJ"); 
                       if (type_check(&var_type_stack, nl) == -1) return -1;
                       } |
-                  expressao_simples MENOS termo { geraCodigo(NULL, "SUBT"); } |
-                  expressao_simples OR termo {geraCodigo(NULL, "DISJ"); } |
                   termo
 ;
 
-termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
+termo: termo BARRA fator 
+        { geraCodigo(NULL, "DIVI"); 
+          if (type_check(&var_type_stack, nl) == -1) return -1;
+        } |
        fator
 ;
 
-fator: fator ASTERICO elemento {  geraCodigo(NULL, "MULT"); } |
-       fator AND elemento { geraCodigo(NULL, "CONJ"); } |
+fator: fator ASTERICO elemento 
+        {  geraCodigo(NULL, "MULT"); 
+          if (type_check(&var_type_stack, nl) == -1) return -1;
+        } |
+       fator AND elemento 
+        { geraCodigo(NULL, "CONJ");
+          if (type_check(&var_type_stack, nl) == -1) return -1;
+        } |
        elemento 
 ;
 
@@ -179,6 +198,7 @@ variavel: IDENT {
     symb_pter = find_identifier(table, token); 
     if (symb_pter != NULL) {
       push_symbol_stack(&symbol_stack, *symb_pter);
+      push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
     } else {
       // bad things happened
     }
@@ -234,7 +254,7 @@ main (int argc, char** argv) {
     printf("%s\n", buffer);
    }
 
-   // print_type_stack(&var_type_stack);
+   print_type_stack(&var_type_stack);
    free_table(table);
    fclose(fp);
    return 0;
@@ -247,5 +267,6 @@ int type_check(tvar_type_stack * var_type_stack, int nl) {
       printf("ERROR: Type mismatch at line %d: t1: %d, t2:%d\n", nl, t1, t2);
       return -1;
     }
+    push_type_stack(var_type_stack, t1);
     return 0;
 }
