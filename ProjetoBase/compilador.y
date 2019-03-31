@@ -3,6 +3,8 @@
 // passados por valor ou por referência.
 
 
+%define parse.error verbose
+
 %{
 #include <stdio.h>
 #include <ctype.h>
@@ -13,6 +15,7 @@
 #include "pilhas_auxiliares.h"
 
 #define CHECK_TYPE 
+
 
 int num_vars;
 int lexical_level = 0;
@@ -263,6 +266,23 @@ main (int argc, char** argv) {
    free_table(table);
    fclose(fp);
    return 0;
+}
+
+void yyerror(char const * s) {
+  extern FILE * yyin;
+  fprintf(stderr, "ERROR:  %s\n", s);
+  FILE * fp = yyin;
+  char buffer[1024];
+  int cl = 0;
+  nl--;
+  fseek(fp, 0, SEEK_SET);
+  while (fgets(buffer, sizeof(buffer), fp) && cl != nl - 1) {
+    cl++;
+  }
+  printf("At line: %d\n >>>>>>\n", nl);
+  printf("\t%d: %s", nl - 1, buffer);
+  fgets(buffer, sizeof(buffer), fp);
+  printf("\t%d: %s", nl, buffer);
 }
 
 int type_check(tvar_type_stack * var_type_stack, int nl) {
