@@ -3,7 +3,7 @@ var m,n,k : boolean;
 begin    
   m := true;
   n := false;
-  k := m > n;
-  k := n = 3;
+  k := (m > n);
+  k := n = true;
 end.
 

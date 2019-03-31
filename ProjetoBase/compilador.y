@@ -207,6 +207,7 @@ atribuicao: variavel
               }
               ;
 
+
 expr: expressao_simples | expr relacao expressao_simples {
                           /* Gerar instrucao de comparacao aqui! */
                           geraCodigo(NULL, last_instruction);
@@ -253,7 +254,8 @@ fator: fator ASTERICO elemento
         { geraCodigo(NULL, "CONJ");
           if (type_check(&var_type_stack, nl) == -1) return -1;
         } |
-       elemento 
+       elemento | 
+       ABRE_PARENTESES expr FECHA_PARENTESES
 ;
 
 elemento: num | 
