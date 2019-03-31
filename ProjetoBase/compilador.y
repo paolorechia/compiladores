@@ -68,6 +68,7 @@ declara_var : { }
               lista_id_var DOIS_PONTOS 
               tipo 
               { /* AMEM */
+                printf("AMEN %d\n", update_var_type(table, token));   
               }
               PONTO_E_VIRGULA
 ;
@@ -78,15 +79,12 @@ tipo        : IDENT
 lista_id_var: lista_id_var VIRGULA IDENT 
               { 
                 /* insere última vars na tabela de símbolos */ 
-                insert_variable(table, token, lexical_level, offset);
-                offset++;
+                offset = insert_variable(table, token, lexical_level, offset);
 
               }
             | IDENT {
                 /* insere vars na tabela de símbolos */
-                insert_variable(table, token, lexical_level, offset);
-                offset++;
-//                sprintf(temp_str, "CRCT %s", token);   
+                offset = insert_variable(table, token, lexical_level, offset);
              }
 ;
 

@@ -349,7 +349,7 @@ void print_function_symbol(symbol s) {
 }
 
 
-void insert_variable(symbol_table * table, char * identifier, int lexical_level, int offset) {
+int insert_variable(symbol_table * table, char * identifier, int lexical_level, int offset) {
   symbol new_symbol;
   new_symbol.category = VARIABLE;
   strcpy(new_symbol.identifier, identifier);
@@ -357,5 +357,48 @@ void insert_variable(symbol_table * table, char * identifier, int lexical_level,
   new_symbol.values.variable.offset = offset;
   new_symbol.values.variable.variable_type = UNDEFINED;
   insert_table(table, new_symbol);
+  offset++;
+  return offset;
+}
+
+int update_var_type(symbol_table * table, char * token) {
+  char parsed_token[TAM_TOKEN];
+  char * pter = parsed_token;
+  char * ch = token;
+  while (*ch) {
+    if (*ch >= 97 && *ch <= 122) {
+      *ch = *ch - 32;
+    }
+    if (*ch < 65 || *ch > 90) {
+      printf("ERROR: Failed to parse variable type from token: %s at char %c!!!\n", token, *ch);
+      printf("%d\n", *ch);
+      return -1;
+    }
+    *pter = *ch;
+    pter++;
+    ch++;
+  }
+  char * integer = "INTEGER";
+  char * boolean = "BOOLEAN";
+  VariableType var_type;
+  if (strcmp(parsed_token, integer) == 0) {
+    var_type = INTEGER;
+  } else if (strcmp(parsed_token, boolean) == 0) {
+    var_type = BOOLEAN;
+  } else {
+    printf("ERROR: Invalid variable type: %s!!! Must be either integer or boolean\n", token);
+    return -1;
+  }
+  int updated_variables = 0;
+  int idx = table->idx;
+  symbol * current_symbol; 
+  current_symbol = &(table->symbols[idx]);
+  while (idx >= 0 && current_symbol->category == VARIABLE && current_symbol->values.variable.variable_type == UNDEFINED) {
+    current_symbol->values.variable.variable_type = var_type;
+    idx--;
+    updated_variables++;
+    current_symbol = &(table->symbols[idx]);
+  }
+  return updated_variables;
 }
 
