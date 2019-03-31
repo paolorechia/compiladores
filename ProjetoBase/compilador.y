@@ -138,10 +138,13 @@ comando_sem_rotulo: atribuicao |
                     comando_condicional
 ;
 
-comando_condicional: IF expr {}
-                     THEN comando_sem_rotulo %prec LOWER_THAN_ELSE |
-                     IF expr {}
-                     THEN comando_sem_rotulo ELSE comando_sem_rotulo
+comando_condicional: if_then cond_else {};
+;
+
+if_then: IF expr {} THEN comando_sem_rotulo {}
+;
+
+cond_else: ELSE comando_sem_rotulo | %prec LOWER_THAN_ELSE
 
 comando_repetitivo: WHILE { 
                             generate_label(&label_counter, (char * )label);
