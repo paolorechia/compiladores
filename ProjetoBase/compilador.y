@@ -134,11 +134,16 @@ atribuicao: variavel
               }
               ;
 
-expr: expressao_simples | relacao expressao_simples
+expr: expressao_simples | expr relacao expressao_simples
 ;
 
 
-relacao: IGUAL | MENOR MAIOR | MENOR | MENOR IGUAL | MAIOR | MAIOR IGUAL
+relacao: IGUAL { geraCodigo(NULL, "CMIG"); } |
+         MENOR { geraCodigo(NULL, "CMME"); } |
+         MAIOR { geraCodigo(NULL, "CMMA"); } |
+         MENOR IGUAL { geraCodigo(NULL, "CMEG"); } |
+         MAIOR IGUAL { geraCodigo(NULL, "CMAG"); } |
+         MENOR MAIOR { geraCodigo(NULL, "CMDG"); } // diferente
 ;
 
 
