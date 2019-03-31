@@ -124,10 +124,9 @@ termo: termo BARRA fator { geraCodigo(NULL, "DIVI"); } |
        fator
 ;
 
-fator: fator ASTERICO num {  geraCodigo(NULL, "MULT"); } |
-       fator AND boolean { geraCodigo(NULL, "CONJ"); } |
-       fator AND variavel { geraCodigo(NULL, "CONJ"); } |
-       num | boolean | variavel
+fator: fator ASTERICO elemento {  geraCodigo(NULL, "MULT"); } |
+       fator AND elemento { geraCodigo(NULL, "CONJ"); } |
+       elemento 
 ;
 
 num: NUMERO { sprintf(temp_str, "CRCT %s", token); 
@@ -138,7 +137,7 @@ num: NUMERO { sprintf(temp_str, "CRCT %s", token);
 
 comando_composto: T_BEGIN comandos T_END 
 
-comandos: comandos comando | comando
+comandos: comandos comando | comando |
 ;
 
 comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
@@ -146,6 +145,8 @@ comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
 comando_sem_rotulo: atribuicao
 
 variavel: IDENT { /*Procura variavel na tabela de simbolos e empilha endereco? */ }
+
+elemento: num | boolean | variavel
 
 boolean: TRUE { geraCodigo(NULL, "CRCT 1");
                 push_type_stack(&var_type_stack, BOOLEAN); 
