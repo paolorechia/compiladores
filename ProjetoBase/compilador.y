@@ -5,7 +5,9 @@
 
 %define parse.error verbose
 
+
 %{
+
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -46,9 +48,12 @@ char temp_str[TAM_TOKEN];
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO 
 %token T_BEGIN T_END VAR IDENT DOIS_PONTOS_IGUAL
 %token MENOR MAIOR IGUAL
-%token IF WHILE DO NUMERO
+%token IF WHILE DO THEN ELSE NUMERO
 %token MAIS MENOS ASTERICO BARRA
 %token AND OR TRUE FALSE
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE 
 
 %%
 
@@ -128,8 +133,15 @@ comandos: comandos comando | comando
 comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
 ;
 
-comando_sem_rotulo: atribuicao | comando_repetitivo
+comando_sem_rotulo: atribuicao |
+                    comando_repetitivo |
+                    comando_condicional
 ;
+
+comando_condicional: IF expr {}
+                     THEN comando_sem_rotulo %prec LOWER_THAN_ELSE |
+                     IF expr {}
+                     THEN comando_sem_rotulo ELSE comando_sem_rotulo
 
 comando_repetitivo: WHILE { 
                             generate_label(&label_counter, (char * )label);
