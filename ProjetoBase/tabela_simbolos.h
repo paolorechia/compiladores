@@ -84,10 +84,10 @@ void print_parameter_symbol(symbol s);
 void print_procedure_symbol(symbol s);
 void print_function_symbol(symbol s);
 
-/* Symbol token functions */
+/* Symbol token functions / higher-level functions */
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
 int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
-
+int compute_main_dmem(symbol_table * table);
 
 #endif /*TABELA_SIMBOLOS_H*/

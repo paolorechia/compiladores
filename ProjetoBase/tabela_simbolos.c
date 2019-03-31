@@ -410,4 +410,18 @@ int update_var_type(symbol_table * table, char * token) {
   return updated_variables;
 }
 
+int remove_local_vars(symbol_table * table) { 
+  int idx = table->idx;
+  symbol * current_symbol;
+  current_symbol = &(table->symbols[idx]);
+  int removed_vars = 0;
+  while (idx >= 0 && current_symbol->category == VARIABLE) {
+    removed_vars++; 
+    current_symbol = &(table->symbols[idx]);
+    idx--;
+  }
+  table->idx = idx;
+  return removed_vars;
+}
+
 

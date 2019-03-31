@@ -43,8 +43,10 @@ programa    :{
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
+             num_vars = remove_local_vars(table);
+             sprintf(temp_str, "DMEM %d", num_vars);
+             geraCodigo (NULL, temp_str);
              geraCodigo (NULL, "PARA"); 
-             /* DMEM aqui? */
              }
 ;
 
