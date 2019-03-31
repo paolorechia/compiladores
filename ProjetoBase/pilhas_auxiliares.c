@@ -22,7 +22,7 @@ VariableType pop_type_stack(tvar_type_stack * type_stack) {
     return -1;
   }
   VariableType var_type = type_stack->A[type_stack->idx];
-  type_stack->idx++;
+  type_stack->idx--;
   return var_type;
 }
 

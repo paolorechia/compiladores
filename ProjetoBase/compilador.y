@@ -140,9 +140,7 @@ relacao: IGUAL | MENOR MAIOR | MENOR | MENOR IGUAL | MAIOR | MAIOR IGUAL
 
 
 expressao_simples: expressao_simples MAIS termo { geraCodigo(NULL, "SOMA");
-                        t1 = pop_type_stack(&var_type_stack);
-                        t2 = pop_type_stack(&var_type_stack);
-                        printf("t1: %d, t2:%d\n", t1, t2);
+                      if (type_check(&var_type_stack, nl) == -1) return -1;
                       } |
                   expressao_simples MENOS termo { geraCodigo(NULL, "SUBT"); } |
                   expressao_simples OR termo {geraCodigo(NULL, "DISJ"); } |
@@ -157,6 +155,17 @@ fator: fator ASTERICO elemento {  geraCodigo(NULL, "MULT"); } |
        fator AND elemento { geraCodigo(NULL, "CONJ"); } |
        elemento 
 ;
+
+elemento: num | 
+          boolean | 
+          variavel {
+          /* Desempilha endereco da memoria da pilha */
+          symb_pter = pop_symbol_stack(&symbol_stack);
+          sprintf(temp_str, "CRVL %d, %d", symb_pter->values.variable.lexical_level,
+                                           symb_pter->values.variable.offset);
+          geraCodigo(NULL, temp_str);
+          } 
+          ;
 
 num: NUMERO { sprintf(temp_str, "CRCT %s", token); 
               push_type_stack(&var_type_stack, INTEGER);
@@ -176,16 +185,6 @@ variavel: IDENT {
   }
   ;
 
-elemento: num | 
-          boolean | 
-          variavel {
-          /* Desempilha endereco da memoria da pilha */
-          symb_pter = pop_symbol_stack(&symbol_stack);
-          sprintf(temp_str, "CRVL %d, %d", symb_pter->values.variable.lexical_level,
-                                           symb_pter->values.variable.offset);
-          geraCodigo(NULL, temp_str);
-          } 
-          ;
 
 boolean: TRUE { geraCodigo(NULL, "CRCT 1");
                 push_type_stack(&var_type_stack, BOOLEAN); 
@@ -223,11 +222,30 @@ main (int argc, char** argv) {
    init_type_stack(&var_type_stack);
 
    yyin=fp;
-   yyparse();
+   if (yyparse() == -1) {
+    printf(">>>>>>\n");
+    char buffer[1024];
+    int cl = 0;
+    nl--;
+    fseek(fp, 0, SEEK_SET);
+    while (fgets(buffer, sizeof(buffer), fp) && cl != nl) {
+      cl++;
+    }
+    printf("%s\n", buffer);
+   }
 
-  
-   print_type_stack(&var_type_stack);
+   // print_type_stack(&var_type_stack);
    free_table(table);
+   fclose(fp);
    return 0;
 }
 
+int type_check(tvar_type_stack * var_type_stack, int nl) {
+    t1 = pop_type_stack(var_type_stack);
+    t2 = pop_type_stack(var_type_stack);
+    if (t1 != t2) {
+      printf("ERROR: Type mismatch at line %d: t1: %d, t2:%d\n", nl, t1, t2);
+      return -1;
+    }
+    return 0;
+}

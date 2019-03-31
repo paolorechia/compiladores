@@ -83,6 +83,7 @@ void print_variable_symbol(symbol s);
 void print_parameter_symbol(symbol s);
 void print_procedure_symbol(symbol s);
 void print_function_symbol(symbol s);
+void variable_type_to_string(VariableType var_type, char * output_str);
 
 /* Symbol token functions / table higher-level functions */
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
