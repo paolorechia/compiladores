@@ -4,6 +4,6 @@ begin
   m := true;
   n := false;
   k := (m > n);
-  k := n = true;
+  k := n = 1;
 end.
 

@@ -125,8 +125,11 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
+comando_sem_rotulo_ou_composto: comando_composto_pv | comando_sem_rotulo 
+
+comando_composto_pv: T_BEGIN comandos T_END PONTO_E_VIRGULA | T_BEGIN T_END PONTO_E_VIRGULA
+
 comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END
-;
 
 comandos: comandos comando | comando
 ;
@@ -185,13 +188,12 @@ if_then: IF expr {
             generate_label(&label_counter, (char * )label);
             push_label_stack(&label_stack, label);
          } 
-         THEN {
-         }
-         comando_sem_rotulo {
+         THEN comando_sem_rotulo_ou_composto {
             label_pter = peek_label_stack(&label_stack); 
             sprintf(temp_str, "DSVS %s", label_pter);
             geraCodigo(NULL, temp_str);
          }
+
 ;
 
 cond_else: ELSE
