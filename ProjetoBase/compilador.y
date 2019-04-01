@@ -197,7 +197,7 @@ if_then: IF expr {
 ;
 
 cond_else: ELSE
-           comando_sem_rotulo
+           comando_sem_rotulo_ou_composto
            | %prec LOWER_THAN_ELSE
 
 comando_repetitivo: WHILE { 
