@@ -74,18 +74,37 @@ programa    :{
 ;
 
 bloco       : 
-              parte_declara_vars comando_composto
-              | declara_subrotina bloco
+              parte_declara_vars declara_subrotina comando_composto
 ;
 
-declara_subrotina: declara_procedimento;
+declara_subrotina: declara_procedimento |
 
-declara_procedimento: PROCEDURE_TOKEN IDENT ABRE_PARENTESES lista_parametros FECHA_PARENTESES bloco
-                      | PROCEDURE_TOKEN IDENT ABRE_PARENTESES FECHA_PARENTESES bloco;
+declara_procedimento: PROCEDURE_TOKEN IDENT {
+                      lexical_level++;
+                      generate_label(&label_counter, (char * )label);
+                      push_label_stack(&label_stack, label);
+                      generate_label(&label_counter, (char * )label);
+                      sprintf(temp_str, "ENPR %d", lexical_level);
+                      insert_procedure(table, token, lexical_level, label);
+                      }
+                      lp PONTO_E_VIRGULA bloco
+
+lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES |
+;
 
 lista_parametros: lista_parametros VIRGULA parametro | parametro
 
 parametro: IDENT | VAR IDENT;
+
+/*
+  strcpy(new_symbol.identifier, "meu_procedure");
+  new_symbol.values.procedure.lexical_level = 1;
+  new_symbol.values.procedure.label = 1;
+  new_symbol.values.procedure.parameter_list = l_init();
+  l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYVAL);
+  l_insert(new_symbol.values.procedure.parameter_list, BOOLEAN, BYVAL);
+  l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYREFERENCE);
+*/
 
 //lista_parametros: VAR IDENT | IDENT |;
 

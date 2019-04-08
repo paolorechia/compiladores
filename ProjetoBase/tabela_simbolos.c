@@ -392,6 +392,12 @@ int insert_variable(symbol_table * table, char * identifier, int lexical_level, 
   return offset;
 }
 
+int insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label) {
+  
+
+}
+
+
 int parse_var_type(char * token) {
   char parsed_token[TAM_TOKEN];
   char * pter = parsed_token;
