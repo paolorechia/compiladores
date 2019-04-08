@@ -26,6 +26,7 @@ int label_counter = 0;
 char label[LABEL_MAX_SIZE];
 char * label_pter;
 char * label_pter2;
+char last_identifier[TAM_TOKEN];
 
 char last_instruction[TAM_TOKEN];
 
@@ -262,18 +263,30 @@ comando_repetitivo: WHILE {
                     }
 ;
 
-atribuicao_ou_chamada_procedimento: atribuicao
-                                    // | chamada_sem_parametro
+
+atribuicao_ou_chamada_procedimento: IDENT { strcpy(last_identifier, token); } acontinua
 ;
 
-chamada_sem_parametro: IDENT PONTO_E_VIRGULA
+acontinua: atribuicao | chamada_sem_parametro
+
+
+chamada_sem_parametro: PONTO_E_VIRGULA { printf("Chamda\n"); }
 ;
 
-
-atribuicao: variavel 
-            DOIS_PONTOS_IGUAL 
+atribuicao: 
+            DOIS_PONTOS_IGUAL {
+              symb_pter = find_identifier(table, last_identifier); 
+              if (symb_pter != NULL) {
+                push_symbol_stack(&symbol_stack, *symb_pter);
+                push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
+              } else {
+                // bad things happened
+              ;
+              }
+            }
             expr { /* Gera sequencia de operacoes, confere tipos */ }
-            PONTO_E_VIRGULA {
+            PONTO_E_VIRGULA 
+            {
               /* Desempilha endereco de memoria e gera ARMZ */ 
                 if (type_check(&var_type_stack, nl) == -1) return -1;
                 symb_pter = pop_symbol_stack(&symbol_stack);
