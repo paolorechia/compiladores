@@ -392,9 +392,14 @@ int insert_variable(symbol_table * table, char * identifier, int lexical_level, 
   return offset;
 }
 
-int insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label) {
-  
-
+void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label) {
+  symbol new_symbol;
+  new_symbol.category = PROCEDURE;
+  strcpy(new_symbol.identifier, ident_token);
+  new_symbol.values.procedure.lexical_level = lexical_level;
+  new_symbol.values.procedure.label =  label_to_integer(label);
+  new_symbol.values.procedure.parameter_list = l_init();
+  insert_table(table, new_symbol);
 }
 
 

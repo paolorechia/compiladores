@@ -65,7 +65,7 @@ programa    :{
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
-             print_table(table);
+             //print_table(table);
              num_vars = remove_local_vars(table);
              sprintf(temp_str, "DMEM %d", num_vars);
              geraCodigo (NULL, temp_str);
@@ -80,14 +80,27 @@ bloco       :
 declara_subrotina: declara_procedimento |
 
 declara_procedimento: PROCEDURE_TOKEN IDENT {
-                      lexical_level++;
-                      generate_label(&label_counter, (char * )label);
-                      push_label_stack(&label_stack, label);
-                      generate_label(&label_counter, (char * )label);
-                      sprintf(temp_str, "ENPR %d", lexical_level);
-                      insert_procedure(table, token, lexical_level, label);
+                        lexical_level++;
+
+                        generate_label(&label_counter, (char * )label);
+                        push_label_stack(&label_stack, label);
+                        sprintf(temp_str, "DSVS %s", label);
+                        geraCodigo(NULL, temp_str);
+
+                        generate_label(&label_counter, (char * )label);
+                        push_label_stack(&label_stack, label);
+                        sprintf(temp_str, "ENPR %d", lexical_level);
+                        label_pter = pop_label_stack(&label_stack);
+                        geraCodigo(label_pter, temp_str);
+
+                        insert_procedure(table, token, lexical_level, label);
+                        print_table(table);
                       }
-                      lp PONTO_E_VIRGULA bloco
+                      lp PONTO_E_VIRGULA 
+                      bloco {
+                        label_pter = pop_label_stack(&label_stack); 
+                        geraCodigo(label_pter, "NADA");
+                      }
 
 lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES |
 ;
@@ -97,10 +110,6 @@ lista_parametros: lista_parametros VIRGULA parametro | parametro
 parametro: IDENT | VAR IDENT;
 
 /*
-  strcpy(new_symbol.identifier, "meu_procedure");
-  new_symbol.values.procedure.lexical_level = 1;
-  new_symbol.values.procedure.label = 1;
-  new_symbol.values.procedure.parameter_list = l_init();
   l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYVAL);
   l_insert(new_symbol.values.procedure.parameter_list, BOOLEAN, BYVAL);
   l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYREFERENCE);

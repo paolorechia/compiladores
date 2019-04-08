@@ -26,24 +26,24 @@ typedef struct head{
 /* Proper Symbol Table struct */
 typedef union level {
   struct variable {
-    unsigned int lexical_level;
-    unsigned int offset;
+    int lexical_level;
+    int offset;
     VariableType variable_type;
   } variable;
   struct parameter {
-    unsigned short lexical_level;
-    unsigned short offset;
+    short lexical_level;
+    short offset;
     VariableType variable_type;
     ParameterType parameter_type;
   } parameter;
   struct procedure {
-    unsigned int lexical_level;
-    unsigned int label;
+    int lexical_level;
+    int label;
     thead * parameter_list;
   } procedure;
   struct function {
-    unsigned short lexical_level;
-    unsigned short label;
+    short lexical_level;
+    short label;
     VariableType return_type;
     thead * parameter_list;
   } function;
