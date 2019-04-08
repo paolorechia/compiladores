@@ -4,6 +4,8 @@
 #include "compilador.h"
 
 #define MAX_TABLE_SIZE 1024
+#define LABEL_MAX_SIZE 4
+#define LABEL_DIGITS 3
 
 typedef enum CategoryType {VARIABLE, FUNCTION, PROCEDURE, PARAMETER} CategoryType;
 typedef enum VariableType {INTEGER, BOOLEAN, UNDEFINED} VariableType;
@@ -24,24 +26,24 @@ typedef struct head{
 /* Proper Symbol Table struct */
 typedef union level {
   struct variable {
-    int lexical_level;
-    int offset;
+    unsigned int lexical_level;
+    unsigned int offset;
     VariableType variable_type;
   } variable;
   struct parameter {
-    short lexical_level;
-    short offset;
+    unsigned short lexical_level;
+    unsigned short offset;
     VariableType variable_type;
     ParameterType parameter_type;
   } parameter;
   struct procedure {
-    int lexical_level;
-    int label;
+    unsigned int lexical_level;
+    unsigned int label;
     thead * parameter_list;
   } procedure;
   struct function {
-    short lexical_level;
-    short label;
+    unsigned short lexical_level;
+    unsigned short label;
     VariableType return_type;
     thead * parameter_list;
   } function;
@@ -83,7 +85,9 @@ void print_variable_symbol(symbol s);
 void print_parameter_symbol(symbol s);
 void print_procedure_symbol(symbol s);
 void print_function_symbol(symbol s);
+void label_to_string(int c, char * ds);
 void variable_type_to_string(VariableType var_type, char * output_str);
+int label_to_integer(char * input_str);
 
 /* Symbol token functions / table higher-level functions */
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);

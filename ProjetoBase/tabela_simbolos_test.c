@@ -59,6 +59,12 @@ int main() {
   assert(search_table(table, "parametro_test") == 2);
   assert(search_table(table, "undefined_var") == -1);
 
+  printf("Testing conversion...\n");
+  int label_test = new_symbol.values.function.label;
+  char dest_str[LABEL_MAX_SIZE];
+  label_to_string(label_test, (char *) &dest_str);
+  int label_converted = label_to_integer(dest_str);
+  printf("Label was... %d, then %s and finally back to: %d\n", label_test, dest_str, label_converted);
 
   remove_table(table, 2);
   print_table(table);

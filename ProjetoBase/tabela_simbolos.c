@@ -257,6 +257,32 @@ void print_parameter_symbol(symbol s) {
             var_type_str, param_type_str);
 }
 
+void label_to_string(int counter, char * dest_str) {
+  char buffer[LABEL_MAX_SIZE];
+  if ( counter < 100) {
+    sprintf(buffer, "R0%d", counter);
+  }
+  else {
+    sprintf(buffer, "R%d", counter);
+  }
+  strncpy(dest_str, buffer, LABEL_MAX_SIZE);
+}
+
+int label_to_integer(char * input_str) {
+  char buffer[LABEL_MAX_SIZE];
+  char * pter = (char *) &buffer;
+  while (*input_str != '\0') {
+    if (*input_str != 'R') {
+      *pter=*input_str;
+      pter++;
+    }
+    input_str++;
+  }
+  *pter = '\0';
+  int number = atoi(buffer);
+  return number;
+}
+
 void print_procedure_symbol(symbol s) {
   thead * parameter_list = s.values.procedure.parameter_list;
   if (parameter_list->size > 0) {
@@ -291,11 +317,14 @@ void print_procedure_symbol(symbol s) {
       strcat(params_string, current_param);
     }
     strcat(params_string, ")");
-    printf("| %s | PROCEDURE | lexical_level: %d | label: %d | params: %s\n",
-              s.identifier, s.values.procedure.lexical_level, s.values.procedure.label, 
+    char label_string[LABEL_MAX_SIZE];
+    label_to_string(s.values.procedure.label, (char * ) &label_string);
+    printf("| %s | PROCEDURE | lexical_level: %d | label: %s | params: %s\n",
+              s.identifier, s.values.procedure.lexical_level, label_string,
               params_string);
     }
 }
+
 void print_function_symbol(symbol s) {
   thead * parameter_list = s.values.function.parameter_list;
   char return_type_str[32];
@@ -342,8 +371,10 @@ void print_function_symbol(symbol s) {
       strcat(params_string, current_param);
     }
     strcat(params_string, ")");
-    printf("| %s | FUNCTION | lexical_level: %d | label: %d | return_type: %s | params: %s\n",
-              s.identifier, s.values.function.lexical_level, s.values.function.label, 
+    char label_string[LABEL_MAX_SIZE];
+    label_to_string(s.values.function.label, (char * ) &label_string);
+    printf("| %s | FUNCTION | lexical_level: %d | label: %s | return_type: %s | params: %s\n",
+              s.identifier, s.values.function.lexical_level, label_string,
               return_type_str, params_string);
     }
 }
@@ -432,4 +463,3 @@ symbol * find_identifier(symbol_table * table, char * identifier) {
   }
   return &(table->symbols[idx]);
 }
-

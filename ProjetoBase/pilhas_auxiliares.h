@@ -5,8 +5,6 @@
 #include <string.h>
 
 #define MAX_STACK_SIZE 1024
-#define LABEL_MAX_SIZE 4
-#define LABEL_DIGITS 3
 
 /* VariableType Stack */
 typedef struct tvar_type_stack {
