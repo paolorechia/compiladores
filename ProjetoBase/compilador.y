@@ -270,21 +270,33 @@ atribuicao_ou_chamada_procedimento: IDENT { strcpy(last_identifier, token); } ac
 acontinua: atribuicao | chamada_sem_parametro
 
 
-chamada_sem_parametro: PONTO_E_VIRGULA { printf("Chamda\n"); }
+chamada_sem_parametro: PONTO_E_VIRGULA { 
+  printf("Chamda\n"); 
+  symb_pter = find_identifier(table, last_identifier); 
+}
 ;
 
 atribuicao: 
             DOIS_PONTOS_IGUAL {
-              symb_pter = find_identifier(table, last_identifier); 
-              if (symb_pter != NULL) {
-                push_symbol_stack(&symbol_stack, *symb_pter);
-                push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
-              } else {
-                // bad things happened
-              ;
+                symb_pter = find_identifier(table, last_identifier); 
+                if (symb_pter != NULL) {
+                  push_symbol_stack(&symbol_stack, *symb_pter);
+                  push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
+                  if (symb_pter->category == VARIABLE) {
+                    push_symbol_stack(&symbol_stack, *symb_pter);
+                    push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
+                  } else {
+                    char category[255];
+                    category_type_to_string(symb_pter->category, (char *) &category);
+                    printf("ERROR: Symbol %s is not a variable! Declared as: %s\n", symb_pter->identifier, category);
+                    return -1;
+                  }
+                } else {
+                  printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+                  return -1;
+                }
               }
-            }
-            expr { /* Gera sequencia de operacoes, confere tipos */ }
+                expr { /* Gera sequencia de operacoes, confere tipos */ }
             PONTO_E_VIRGULA 
             {
               /* Desempilha endereco de memoria e gera ARMZ */ 
@@ -369,10 +381,9 @@ variavel: IDENT {
   /*Procura variavel na tabela de simbolos e empilha endereco? */ 
     symb_pter = find_identifier(table, token); 
     if (symb_pter != NULL) {
-      push_symbol_stack(&symbol_stack, *symb_pter);
-      push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
     } else {
-      // bad things happened
+        printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+        return -1;
     }
   }
   ;
@@ -452,8 +463,12 @@ void yyerror(char const * s) {
 int type_check(tvar_type_stack * var_type_stack, int nl) {
     t1 = pop_type_stack(var_type_stack);
     t2 = pop_type_stack(var_type_stack);
+    char var_type_str1[255];
+    char var_type_str2[255];
+    variable_type_to_string(t1, (char *) &var_type_str1);
+    variable_type_to_string(t2, (char *) &var_type_str2);
     if (t1 != t2) {
-      printf("ERROR: Type mismatch at line %d: t1: %d, t2:%d\n", nl, t1, t2);
+      printf("ERROR: Type mismatch at line %d: t1: %s, t2:%s\n", nl, var_type_str1, var_type_str2);
       return -1;
     }
     push_type_stack(var_type_stack, t1);

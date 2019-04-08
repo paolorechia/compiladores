@@ -283,6 +283,37 @@ int label_to_integer(char * input_str) {
   return number;
 }
 
+void variable_type_to_string(VariableType var_type, char * var_type_str) {
+  switch(var_type) {
+    case INTEGER:
+      strcpy(var_type_str, "INTEGER");
+      break;
+    case BOOLEAN:
+      strcpy(var_type_str, "BOOLEAN");
+      break;
+    case UNDEFINED:
+      strcpy(var_type_str, "UNDEFINED");
+      break;
+  }
+}
+
+void category_type_to_string(CategoryType cat_type, char * output_str) {
+  switch(cat_type) {
+    case VARIABLE:
+      strcpy(output_str, "VARIABLE");
+      break;
+    case FUNCTION:
+      strcpy(output_str, "FUNCTION");
+      break;
+    case PROCEDURE:
+      strcpy(output_str, "PROCEDURE");
+      break;
+    case PARAMETER:
+      strcpy(output_str, "PARAMETER");
+      break;
+  }
+}
+
 void print_procedure_symbol(symbol s) {
   thead * parameter_list = s.values.procedure.parameter_list;
   char params_string[2048];

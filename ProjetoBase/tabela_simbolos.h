@@ -87,6 +87,7 @@ void print_procedure_symbol(symbol s);
 void print_function_symbol(symbol s);
 void label_to_string(int c, char * ds);
 void variable_type_to_string(VariableType var_type, char * output_str);
+void category_type_to_string(CategoryType cat_type, char * output_str);
 int label_to_integer(char * input_str);
 
 /* Symbol token functions / table higher-level functions */
