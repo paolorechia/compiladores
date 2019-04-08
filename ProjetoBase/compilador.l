@@ -214,6 +214,18 @@ write { simbolo = simb_write;
           return WRITE;
  }
 
+procedure { simbolo = simb_procedure;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" procedure ");
+          return PROCEDURE_TOKEN;
+ }
+
+function { simbolo = simb_function;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" function ");
+          return FUNCTION_TOKEN;
+ }
+
 {numero} { simbolo = simb_numero;
               strncpy(token, yytext, TAM_TOKEN);
               IMPRIME(" numero ");

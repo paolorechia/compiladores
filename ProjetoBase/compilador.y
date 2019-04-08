@@ -48,6 +48,7 @@ char temp_str[TAM_TOKEN];
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO 
 %token T_BEGIN T_END VAR IDENT DOIS_PONTOS_IGUAL
 %token MENOR MAIOR IGUAL
+%token PROCEDURE_TOKEN FUNCTION_TOKEN
 %token IF WHILE DO THEN ELSE NUMERO
 %token MAIS MENOS ASTERICO BARRA
 %token AND OR TRUE FALSE
@@ -73,15 +74,25 @@ programa    :{
 ;
 
 bloco       : 
-              parte_declara_vars
-              { 
-              }
+              parte_declara_vars comando_composto
+              | declara_subrotina bloco
+;
 
-              comando_composto
-              ;
+declara_subrotina: declara_procedimento;
 
+declara_procedimento: PROCEDURE_TOKEN IDENT ABRE_PARENTESES lista_parametros FECHA_PARENTESES bloco
+                      | PROCEDURE_TOKEN IDENT ABRE_PARENTESES FECHA_PARENTESES bloco;
 
+lista_parametros: lista_parametros VIRGULA parametro | parametro
 
+parametro: IDENT | VAR IDENT;
+
+//lista_parametros: VAR IDENT | IDENT |;
+
+//declara_subrotina: declara_procedimento | declara_funcao;
+
+//declara_funcao: FUNCTION_TOKEN IDENT lista_parametros bloco
+//;
 
 parte_declara_vars:  var 
 ;
