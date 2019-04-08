@@ -65,7 +65,7 @@ programa    :{
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
-             //print_table(table);
+             print_table(table);
              num_vars = remove_local_vars(table);
              sprintf(temp_str, "DMEM %d", num_vars);
              geraCodigo (NULL, temp_str);
@@ -176,7 +176,7 @@ comandos: comandos comando | comando
 comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
 ;
 
-comando_sem_rotulo: atribuicao |
+comando_sem_rotulo: atribuicao_ou_chamada_procedimento |
                     comando_repetitivo |
                     comando_condicional |
                     leitura |
@@ -261,6 +261,14 @@ comando_repetitivo: WHILE {
                       geraCodigo(label_pter2, "NADA");
                     }
 ;
+
+atribuicao_ou_chamada_procedimento: atribuicao
+                                    // | chamada_sem_parametro
+;
+
+chamada_sem_parametro: IDENT PONTO_E_VIRGULA
+;
+
 
 atribuicao: variavel 
             DOIS_PONTOS_IGUAL 

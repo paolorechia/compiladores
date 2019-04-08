@@ -285,6 +285,8 @@ int label_to_integer(char * input_str) {
 
 void print_procedure_symbol(symbol s) {
   thead * parameter_list = s.values.procedure.parameter_list;
+  char params_string[2048];
+  strcpy(params_string, "No Parameters");
   if (parameter_list->size > 0) {
     char var_type_str[32];
     char param_type_str[32];
@@ -317,12 +319,12 @@ void print_procedure_symbol(symbol s) {
       strcat(params_string, current_param);
     }
     strcat(params_string, ")");
-    char label_string[LABEL_MAX_SIZE];
-    label_to_string(s.values.procedure.label, (char * ) &label_string);
-    printf("| %s | PROCEDURE | lexical_level: %d | label: %s | params: %s\n",
-              s.identifier, s.values.procedure.lexical_level, label_string,
-              params_string);
-    }
+  }
+  char label_string[LABEL_MAX_SIZE];
+  label_to_string(s.values.procedure.label, (char * ) &label_string);
+  printf("| %s | PROCEDURE | lexical_level: %d | label: %s | params: %s\n",
+            s.identifier, s.values.procedure.lexical_level, label_string,
+            params_string);
 }
 
 void print_function_symbol(symbol s) {
@@ -339,11 +341,12 @@ void print_function_symbol(symbol s) {
       strcpy(return_type_str, "UNDEFINED");
       break;
   }
+  char params_string[2048];
+  strcpy(params_string, "No Parameters");
   if (parameter_list->size > 0) {
     char var_type_str[32];
     char param_type_str[32];
     char current_param[96];
-    char params_string[2048];
     strcpy(params_string, "( ");
     tnode * node = parameter_list->node;
     while (node->nxt != NULL){
@@ -371,12 +374,12 @@ void print_function_symbol(symbol s) {
       strcat(params_string, current_param);
     }
     strcat(params_string, ")");
-    char label_string[LABEL_MAX_SIZE];
-    label_to_string(s.values.function.label, (char * ) &label_string);
-    printf("| %s | FUNCTION | lexical_level: %d | label: %s | return_type: %s | params: %s\n",
-              s.identifier, s.values.function.lexical_level, label_string,
-              return_type_str, params_string);
-    }
+  }
+  char label_string[LABEL_MAX_SIZE];
+  label_to_string(s.values.function.label, (char * ) &label_string);
+  printf("| %s | FUNCTION | lexical_level: %d | label: %s | return_type: %s | params: %s\n",
+            s.identifier, s.values.function.lexical_level, label_string,
+            return_type_str, params_string);
 }
 
 
