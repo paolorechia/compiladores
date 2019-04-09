@@ -54,6 +54,7 @@ typedef struct int_stack {
 void init_istack(tint_stack * int_stack);
 int push_istack(tint_stack * int_stack, int new_val);
 int pop_istack(tint_stack * int_stack);
+int peek_istack(tint_stack * int_stack);
 int update_top_istack(tint_stack * int_stack, int new_val);
 void print_istack(tint_stack * int_stack);
 

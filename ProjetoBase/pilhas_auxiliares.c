@@ -139,6 +139,9 @@ int push_istack(tint_stack * istack, int new_val) {
   istack->A[istack->idx] = new_val;
   return istack->idx;
 }
+int peek_istack(tint_stack * istack) {
+  return istack->A[istack->idx];
+}
 int pop_istack(tint_stack * istack) {
   if (istack->idx <= 0) {
     printf("Int stack is empty!\n");

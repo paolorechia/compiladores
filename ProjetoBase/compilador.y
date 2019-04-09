@@ -35,6 +35,8 @@ symbol_table * table;
 tvar_type_stack var_type_stack;
 tsymbol_stack symbol_stack;
 tlabel_stack label_stack;
+tint_stack offset_stack;
+
 
 VariableType t1;
 VariableType t2;
@@ -93,6 +95,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         geraCodigo(label_pter, temp_str);
 
                         insert_procedure(table, token, lexical_level, label);
+                        push_istack(&offset_stack, 0);
                       }
                       lp PONTO_E_VIRGULA 
                       bloco {
@@ -106,6 +109,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         geraCodigo(label_pter, "NADA");
                         lexical_level--;
                         print_table(table);
+                        pop_istack(&offset_stack);
                       }
 
 lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES |
@@ -157,12 +161,16 @@ tipo        : IDENT
 lista_id_var: lista_id_var VIRGULA IDENT 
               { 
                 /* insere última vars na tabela de símbolos */ 
+                int offset = peek_istack(&offset_stack);
                 offset = insert_variable(table, token, lexical_level, offset);
+                update_top_istack(&offset_stack, offset);
 
               }
             | IDENT {
                 /* insere vars na tabela de símbolos */
+                int offset = peek_istack(&offset_stack);
                 offset = insert_variable(table, token, lexical_level, offset);
+                update_top_istack(&offset_stack, offset);
              }
 ;
 
@@ -442,6 +450,7 @@ main (int argc, char** argv) {
    table = malloc_table(MAX_TABLE_SIZE);
    symbol new_symbol;
    init_type_stack(&var_type_stack);
+   init_istack(&offset_stack);
 
    yyin=fp;
    if (yyparse() == -1) {
