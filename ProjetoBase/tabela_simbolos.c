@@ -492,9 +492,9 @@ int remove_local_vars(symbol_table * table) {
   current_symbol = &(table->symbols[idx]);
   int removed_vars = 0;
   while (idx >= 0 && current_symbol->category == VARIABLE) {
-    removed_vars++; 
-    current_symbol = &(table->symbols[idx]);
+    moved_vars++; 
     idx--;
+    current_symbol = &(table->symbols[idx]);
   }
   table->idx = idx;
   return removed_vars;

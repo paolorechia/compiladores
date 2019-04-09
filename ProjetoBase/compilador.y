@@ -17,6 +17,7 @@
 
 
 int num_vars;
+int param_num = 0;
 int lexical_level = 0;
 int offset = 0;
 int label_counter = 0;
@@ -92,13 +93,19 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         geraCodigo(label_pter, temp_str);
 
                         insert_procedure(table, token, lexical_level, label);
-                        print_table(table);
                       }
                       lp PONTO_E_VIRGULA 
                       bloco {
+                        print_table(table);
+                        sprintf(temp_str, "DMEM %d", remove_local_vars(table));
+                        geraCodigo(NULL, temp_str);
+                        // implementar pilha ou algo mais elaborado para param_num quando acrescentar parametros
+                        sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
+                        geraCodigo(NULL, temp_str);
                         label_pter = pop_label_stack(&label_stack); 
                         geraCodigo(label_pter, "NADA");
                         lexical_level--;
+                        print_table(table);
                       }
 
 lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES |
