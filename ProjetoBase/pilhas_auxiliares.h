@@ -45,4 +45,16 @@ void print_label_stack(tlabel_stack * label_stack);
 int increment_label_counter(int count);
 void generate_label(int * counter, char * dest_str);
 
+/* Int Stack */
+typedef struct int_stack {
+  char A[MAX_STACK_SIZE];
+  int idx;
+} tint_stack;
+
+void init_istack(tint_stack * int_stack);
+int push_istack(tint_stack * int_stack, int new_val);
+int pop_istack(tint_stack * int_stack);
+int update_top_istack(tint_stack * int_stack, int new_val);
+void print_istack(tint_stack * int_stack);
+
 #endif /* PILHAS_AUXILIARES_H */

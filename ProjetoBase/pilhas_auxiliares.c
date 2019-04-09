@@ -89,6 +89,10 @@ int push_label_stack(tlabel_stack * label_stack, char * label) {
 }
 
 char * pop_label_stack(tlabel_stack * label_stack) {
+  if (label_stack->idx <= 0) {
+    printf("Label stack is empty!\n");
+    return (char *) NULL;
+  }
   label_stack->idx--;
   return (char * )&(label_stack->A[label_stack->idx + 1]);
 }
@@ -121,4 +125,33 @@ void generate_label(int  * counter, char * dest_str) {
   }
   strncpy(dest_str, buffer, LABEL_MAX_SIZE);
   *counter = increment_label_counter(*counter);
+}
+
+void init_istack(tint_stack * istack) {
+  istack->idx = 0;
+  istack->A[istack->idx] = 0;
+}
+int push_istack(tint_stack * istack, int new_val) {
+  if (istack->idx > MAX_STACK_SIZE) {
+    return -1;
+  }
+  istack->idx++;
+  istack->A[istack->idx] = new_val;
+  return istack->idx;
+}
+int pop_istack(tint_stack * istack) {
+  if (istack->idx <= 0) {
+    printf("Int stack is empty!\n");
+    return -1;
+  }
+  istack->idx--;
+  return istack->A[istack->idx + 1];
+}
+int update_top_istack(tint_stack * istack, int new_val) {
+  istack->A[istack->idx]= new_val;
+  return istack->idx;
+}
+
+void print_istack(tint_stack * istack) {
+  printf("NOT IMPLEMENTED\n");
 }
