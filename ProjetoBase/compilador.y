@@ -1,10 +1,7 @@
-
 // Testar se funciona corretamente o empilhamento de parâmetros
 // passados por valor ou por referência.
 
-
 %define parse.error verbose
-
 
 %{
 
@@ -23,12 +20,13 @@ int num_vars;
 int lexical_level = 0;
 int offset = 0;
 int label_counter = 0;
+
 char label[LABEL_MAX_SIZE];
 char * label_pter;
 char * label_pter2;
 char last_identifier[TAM_TOKEN];
-
 char last_instruction[TAM_TOKEN];
+char temp_str[TAM_TOKEN];
 
 symbol new_symbol;
 symbol * symb_pter;
@@ -41,7 +39,6 @@ VariableType t1;
 VariableType t2;
 
 extern char * yytext;
-char temp_str[TAM_TOKEN];
 
 %}
 
@@ -272,7 +269,7 @@ acontinua: atribuicao | chamada_sem_parametro
 
 chamada_sem_parametro: PONTO_E_VIRGULA { 
   printf("Chamda\n"); 
-  symb_pter = find_identifier(table, last_identifier); 
+//  symb_pter = find_identifier(table, last_identifier); 
 }
 ;
 
@@ -282,10 +279,7 @@ atribuicao:
                 if (symb_pter != NULL) {
                   push_symbol_stack(&symbol_stack, *symb_pter);
                   push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
-                  if (symb_pter->category == VARIABLE) {
-                    push_symbol_stack(&symbol_stack, *symb_pter);
-                    push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
-                  } else {
+                  if (symb_pter->category != VARIABLE) {
                     char category[255];
                     category_type_to_string(symb_pter->category, (char *) &category);
                     printf("ERROR: Symbol %s is not a variable! Declared as: %s\n", symb_pter->identifier, category);
@@ -296,7 +290,7 @@ atribuicao:
                   return -1;
                 }
               }
-                expr { /* Gera sequencia de operacoes, confere tipos */ }
+            expr { /* Gera sequencia de operacoes, confere tipos */ }
             PONTO_E_VIRGULA 
             {
               /* Desempilha endereco de memoria e gera ARMZ */ 
@@ -370,7 +364,8 @@ elemento: num |
           } 
           ;
 
-num: NUMERO { sprintf(temp_str, "CRCT %s", token); 
+num: NUMERO { 
+              sprintf(temp_str, "CRCT %s", token); 
               push_type_stack(&var_type_stack, INTEGER);
               geraCodigo(NULL, temp_str);
             }
@@ -381,6 +376,8 @@ variavel: IDENT {
   /*Procura variavel na tabela de simbolos e empilha endereco? */ 
     symb_pter = find_identifier(table, token); 
     if (symb_pter != NULL) {
+      push_symbol_stack(&symbol_stack, *symb_pter);
+      push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
     } else {
         printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
         return -1;
