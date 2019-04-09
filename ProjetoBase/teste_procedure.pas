@@ -6,5 +6,6 @@ program proc1 (input, output);
     end
 begin
   read(x);
+  p;
   write(x, y);
 end.

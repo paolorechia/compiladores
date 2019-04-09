@@ -269,7 +269,6 @@ acontinua: atribuicao | chamada_sem_parametro
 
 
 chamada_sem_parametro: PONTO_E_VIRGULA { 
-  printf("Chamda\n"); 
   symb_pter = find_identifier(table, last_identifier); 
   if (symb_pter == NULL) {
     printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
