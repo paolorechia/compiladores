@@ -98,6 +98,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                       bloco {
                         label_pter = pop_label_stack(&label_stack); 
                         geraCodigo(label_pter, "NADA");
+                        lexical_level--;
                       }
 
 lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES |
@@ -269,7 +270,22 @@ acontinua: atribuicao | chamada_sem_parametro
 
 chamada_sem_parametro: PONTO_E_VIRGULA { 
   printf("Chamda\n"); 
-//  symb_pter = find_identifier(table, last_identifier); 
+  symb_pter = find_identifier(table, last_identifier); 
+  if (symb_pter == NULL) {
+    printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+    return -1;
+  } else {
+      if (symb_pter->category != PROCEDURE) {
+        char category[255];
+        category_type_to_string(symb_pter->category, (char *) &category);
+        printf("ERROR: Symbol %s is not a procedure! Declared as: %s\n", symb_pter->identifier, category);
+        return -1;
+      }
+      char label[55];
+      label_to_string(symb_pter->values.procedure.label, label);
+      sprintf(temp_str, "CHPR %s, %d", label, lexical_level);
+      geraCodigo(NULL, temp_str);
+  }
 }
 ;
 
@@ -299,7 +315,7 @@ atribuicao:
                 sprintf(temp_str, "ARMZ %d, %d", symb_pter->values.variable.lexical_level,
                                                  symb_pter->values.variable.offset);
                 geraCodigo(NULL, temp_str);
-              }
+            }
               ;
 
 
