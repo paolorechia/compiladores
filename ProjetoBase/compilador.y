@@ -110,16 +110,22 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         label_pter = pop_label_stack(&label_stack); 
                         geraCodigo(label_pter, "NADA");
                         lexical_level--;
-                        print_table(table);
                         pop_istack(&offset_stack);
                       }
+;
 
-lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES |
+lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES  |
 ;
 
 lista_parametros: lista_parametros VIRGULA parametro | parametro
 
-parametro: IDENT | VAR IDENT;
+parametro: IDENT { 
+            strcpy(last_identifier, token);
+           } DOIS_PONTOS tipo {
+            insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
+            print_table(table);
+           } 
+           | VAR IDENT tipo;
 
 /*
   l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYVAL);
@@ -127,12 +133,6 @@ parametro: IDENT | VAR IDENT;
   l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYREFERENCE);
 */
 
-//lista_parametros: VAR IDENT | IDENT |;
-
-//declara_subrotina: declara_procedimento | declara_funcao;
-
-//declara_funcao: FUNCTION_TOKEN IDENT lista_parametros bloco
-//;
 
 parte_declara_vars:  var 
 ;
@@ -453,6 +453,7 @@ main (int argc, char** argv) {
    symbol new_symbol;
    init_type_stack(&var_type_stack);
    init_istack(&offset_stack);
+ 
 
    yyin=fp;
    if (yyparse() == -1) {

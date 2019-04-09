@@ -12,12 +12,13 @@ thead * l_init(){
     head->size = 0;
     return head;
 }
-void l_insert(thead * head, VariableType var_type, ParameterType param_type) {
+void l_insert(thead * head, char identifier[TAM_TOKEN], VariableType var_type, ParameterType param_type) {
     tnode * node = head->node;
     while (node->nxt != NULL){
         node = node -> nxt;
     }
     node->nxt=malloc(sizeof(tnode));
+    strcpy(node->nxt->identifier, identifier);
     node->nxt->variable_type = var_type;
     node->nxt->parameter_type = param_type;
     node->nxt->nxt=NULL;
@@ -33,7 +34,7 @@ int l_copy(thead * origin, thead * destination) {
     tnode * node = origin->node;
     while (node->nxt != NULL){
         node = node->nxt;
-        l_insert(destination, node->variable_type, node->parameter_type);
+        l_insert(destination, node->identifier, node->variable_type, node->parameter_type);
     }
     destination->size = origin->size;
     return 0;
@@ -75,7 +76,7 @@ void print_node(tnode * node) {
       break;
   }
 
-  printf("VariableType: %s; ParameterType: %s\n", type_str, param_str);
+  printf("ID: %s; VariableType: %s; ParameterType: %s\n", node->identifier, type_str, param_str);
 }
 
 
@@ -124,7 +125,7 @@ void free_table(symbol_table * table) {
 int insert_table(symbol_table * table, symbol new_symbol){
   table->idx++;
   symbol * saved_symbol = &table->symbols[table->idx];
-  strcpy(saved_symbol->identifier, new_symbol.identifier);
+  strncpy(saved_symbol->identifier, new_symbol.identifier, TAM_TOKEN);
   saved_symbol->category = new_symbol.category;
   switch(new_symbol.category) {
     case VARIABLE:
@@ -183,6 +184,10 @@ int search_table(symbol_table * table, char id[TAM_TOKEN]){
     i--;
   }
   return idx;
+}
+
+symbol * peek_table(symbol_table * table) {
+  return &(table->symbols[table->idx]);
 }
 
 void print_table(symbol_table * table) {
@@ -435,6 +440,34 @@ void insert_procedure(symbol_table * table, char * ident_token, int lexical_leve
   new_symbol.values.procedure.parameter_list = l_init();
   insert_table(table, new_symbol);
 }
+
+void insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type) {
+  VariableType var_type = parse_var_type(var_type_str);
+  symbol new_symbol;
+  strcpy(new_symbol.identifier, ident_token);
+  new_symbol.category = PARAMETER;
+  new_symbol.values.parameter.lexical_level= lexical_level;
+  new_symbol.values.parameter.offset= 0;
+  new_symbol.values.parameter.variable_type = var_type;
+  new_symbol.values.parameter.parameter_type = param_type;
+  insert_table(table, new_symbol);
+}
+
+/* Properly implement this function
+void update_procedure_with_parameters(symbol_table * table) {
+  int idx = table->idx;
+  symbol * current_symbol;
+  current_symbol = &(table->symbols[idx]);
+  int removed_vars = 0;
+  while (idx >= 0 && current_symbol->category == VARIABLE) {
+    removed_vars++; 
+    idx--;
+    current_symbol = &(table->symbols[idx]);
+  }
+  table->idx = idx;
+  return removed_vars;
+}
+*/
 
 
 int parse_var_type(char * token) {

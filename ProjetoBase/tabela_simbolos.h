@@ -13,6 +13,7 @@ typedef enum ParameterType {BYVAL, BYREFERENCE} ParameterType;
 
 /* Linked list struct */
 typedef struct cel_struct{
+    char identifier[TAM_TOKEN];
     VariableType variable_type;
     ParameterType parameter_type;
     struct cel_struct * nxt;
@@ -65,7 +66,7 @@ typedef struct {
 
 /* Linked list functions */
 thead * l_init();
-void l_insert(thead *, VariableType, ParameterType);
+void l_insert(thead *, char id[TAM_TOKEN], VariableType, ParameterType);
 int l_copy(thead * origin, thead * destination);
 void l_print(thead * head);
 void print_node(tnode * node);
@@ -80,6 +81,7 @@ void free_table(symbol_table * table);
 int insert_table(symbol_table * table, symbol new_symbol);
 int remove_table(symbol_table * table, int number_to_remove);
 int search_table(symbol_table * table, char id[TAM_TOKEN]);
+symbol * peek_table(symbol_table * table);
 void print_table(symbol_table * table);
 void print_variable_symbol(symbol s);
 void print_parameter_symbol(symbol s);
@@ -92,6 +94,8 @@ int label_to_integer(char * input_str);
 
 /* Symbol token functions / table higher-level functions */
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
+void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label);
+void insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type);
 int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
 int remove_local_vars(symbol_table * table);
