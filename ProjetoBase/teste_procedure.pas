@@ -8,6 +8,12 @@ program proc1 (input, output);
         p;
       y:= y * z;
     end
+  procedure q;
+    var u: integer;
+    begin
+      u := 3 * 7;
+      write(u);
+    end
 begin
   read(x);
   p;

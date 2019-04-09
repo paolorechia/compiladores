@@ -78,7 +78,9 @@ bloco       :
               parte_declara_vars declara_subrotina comando_composto
 ;
 
-declara_subrotina: declara_procedimento |
+declara_subrotina: lista_procedimentos |
+
+lista_procedimentos: lista_procedimentos declara_procedimento | declara_procedimento
 
 declara_procedimento: PROCEDURE_TOKEN IDENT {
                         lexical_level++;
