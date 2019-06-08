@@ -324,7 +324,6 @@ void print_procedure_symbol(symbol s) {
     char var_type_str[32];
     char param_type_str[32];
     char current_param[96];
-    char params_string[2048];
     strcpy(params_string, "( ");
     tnode * node = parameter_list->node;
     while (node->nxt != NULL){
@@ -438,33 +437,35 @@ void insert_procedure(symbol_table * table, char * ident_token, int lexical_leve
   insert_table(table, new_symbol);
 }
 
-void insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type) {
+VariableType insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type) {
   VariableType var_type = parse_var_type(var_type_str);
   symbol new_symbol;
   strcpy(new_symbol.identifier, ident_token);
   new_symbol.category = PARAMETER;
-  new_symbol.values.parameter.lexical_level= lexical_level;
+  new_symbol.values.parameter.lexical_level= (short) lexical_level;
   new_symbol.values.parameter.offset= 0;
   new_symbol.values.parameter.variable_type = var_type;
   new_symbol.values.parameter.parameter_type = param_type;
   insert_table(table, new_symbol);
+  return var_type;
 }
 
-/* Properly implement this function
-void update_procedure_with_parameters(symbol_table * table) {
+/* Properly implement this function */
+int update_procedure_with_parameters(symbol_table * table) {
+  short current_offset = -4;
   int idx = table->idx;
   symbol * current_symbol;
   current_symbol = &(table->symbols[idx]);
-  int removed_vars = 0;
-  while (idx >= 0 && current_symbol->category == VARIABLE) {
-    removed_vars++; 
+  int updated_vars = 0;
+  while (idx >= 0 && current_symbol->category == PARAMETER) {
+    current_symbol->values.parameter.offset = current_offset;
+    updated_vars++; 
+    current_offset--;
     idx--;
     current_symbol = &(table->symbols[idx]);
   }
-  table->idx = idx;
-  return removed_vars;
+  return updated_vars;
 }
-*/
 
 
 int parse_var_type(char * token) {

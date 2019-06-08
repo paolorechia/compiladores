@@ -95,7 +95,8 @@ int label_to_integer(char * input_str);
 /* Symbol token functions / table higher-level functions */
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
 void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label);
-void insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type);
+int update_procedure_with_parameters(symbol_table * table);
+VariableType insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type);
 int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
 int remove_local_vars(symbol_table * table);

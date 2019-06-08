@@ -27,6 +27,8 @@ char last_identifier[TAM_TOKEN];
 char last_instruction[TAM_TOKEN];
 char temp_str[TAM_TOKEN];
 
+thead * last_param_list;
+
 symbol new_symbol;
 symbol * symb_pter;
 symbol_table * table;
@@ -95,6 +97,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         geraCodigo(label_pter, temp_str);
 
                         insert_procedure(table, token, lexical_level, label);
+                        last_param_list = peek_table(table)->values.procedure.parameter_list;
                         push_istack(&offset_stack, 0);
                       }
                       lp PONTO_E_VIRGULA 
@@ -112,7 +115,11 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                       }
 ;
 
-lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES  |
+lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES { 
+                                      // print_table(table);
+                                      update_procedure_with_parameters(table);
+                                      print_table(table);
+                                      } |
 ;
 
 lista_parametros: lista_parametros VIRGULA parametro | parametro
@@ -120,10 +127,13 @@ lista_parametros: lista_parametros VIRGULA parametro | parametro
 parametro: IDENT { 
             strcpy(last_identifier, token);
            } DOIS_PONTOS tipo {
-            insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
-            print_table(table);
+            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
+            l_insert(last_param_list, last_identifier, tokenType, BYVAL);
            } 
-           | VAR IDENT tipo;
+           | VAR IDENT tipo {
+            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYREFERENCE);
+            l_insert(last_param_list, last_identifier, tokenType, BYREFERENCE);
+           }
 
 /*
   l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYVAL);
@@ -280,7 +290,7 @@ comando_repetitivo: WHILE {
 atribuicao_ou_chamada_procedimento: IDENT { strcpy(last_identifier, token); } acontinua
 ;
 
-acontinua: atribuicao | chamada_sem_parametro
+acontinua: atribuicao | chamada_sem_parametro | chamada_com_parametros
 
 
 chamada_sem_parametro: PONTO_E_VIRGULA { 
@@ -303,16 +313,22 @@ chamada_sem_parametro: PONTO_E_VIRGULA {
 }
 ;
 
+chamada_com_parametros: ABRE_PARENTESES lista_parametros FECHA_PARENTESES {
+
+
+
+};
+
 atribuicao: 
             DOIS_PONTOS_IGUAL {
                 symb_pter = find_identifier(table, last_identifier); 
                 if (symb_pter != NULL) {
                   push_symbol_stack(&symbol_stack, *symb_pter);
                   push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
-                  if (symb_pter->category != VARIABLE) {
+                  if (symb_pter->category != VARIABLE && symb_pter->category != PARAMETER) {
                     char category[255];
                     category_type_to_string(symb_pter->category, (char *) &category);
-                    printf("ERROR: Symbol %s is not a variable! Declared as: %s\n", symb_pter->identifier, category);
+                    printf("ERROR: Symbol %s is not a variable or a parameter! Declared as: %s\n", symb_pter->identifier, category);
                     return -1;
                   }
                 } else {
@@ -388,8 +404,19 @@ elemento: num |
           variavel {
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
-          sprintf(temp_str, "CRVL %d, %d", symb_pter->values.variable.lexical_level,
-                                           symb_pter->values.variable.offset);
+          switch(symb_pter->category) {
+            case VARIABLE:
+              sprintf(temp_str, "CRVL %hd, %hd", symb_pter->values.variable.lexical_level,
+                                               symb_pter->values.variable.offset);
+              break;
+            case PARAMETER:
+              sprintf(temp_str, "CRVL %hd, %hd", symb_pter->values.parameter.lexical_level,
+                                               symb_pter->values.parameter.offset);
+              break;
+            default:
+              printf("ERROR: INVALID CATEGORY!\n");
+              return -1;
+          }
           geraCodigo(NULL, temp_str);
           } 
           ;
