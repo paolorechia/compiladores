@@ -213,15 +213,13 @@ leitura: READ ABRE_PARENTESES lista_leitura FECHA_PARENTESES PONTO_E_VIRGULA
 lista_leitura: lista_leitura VIRGULA variavel { 
                     symb_pter = pop_symbol_stack(&symbol_stack);
                     geraCodigo(NULL, "LEIT");
-                    sprintf(temp_str, "ARMZ %d, %d", symb_pter->values.variable.lexical_level,
-                                                     symb_pter->values.variable.offset);
+                    assemble_read_write_instruction(temp_str, "ARMZ", symb_pter);
                     geraCodigo(NULL, temp_str);
                     } 
                     | variavel {
                       symb_pter = pop_symbol_stack(&symbol_stack);
                       geraCodigo(NULL, "LEIT");
-                      sprintf(temp_str, "ARMZ %d, %d", symb_pter->values.variable.lexical_level,
-                                                       symb_pter->values.variable.offset);
+                      assemble_read_write_instruction(temp_str, "ARMZ", symb_pter);
                       geraCodigo(NULL, temp_str);
                     } 
 
@@ -342,8 +340,7 @@ atribuicao:
               /* Desempilha endereco de memoria e gera ARMZ */ 
                 if (type_check(&var_type_stack, nl) == -1) return -1;
                 symb_pter = pop_symbol_stack(&symbol_stack);
-                sprintf(temp_str, "ARMZ %d, %d", symb_pter->values.variable.lexical_level,
-                                                 symb_pter->values.variable.offset);
+                assemble_read_write_instruction(temp_str, "ARMZ", symb_pter);
                 geraCodigo(NULL, temp_str);
             }
               ;
@@ -404,19 +401,7 @@ elemento: num |
           variavel {
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
-          switch(symb_pter->category) {
-            case VARIABLE:
-              sprintf(temp_str, "CRVL %hd, %hd", symb_pter->values.variable.lexical_level,
-                                               symb_pter->values.variable.offset);
-              break;
-            case PARAMETER:
-              sprintf(temp_str, "CRVL %hd, %hd", symb_pter->values.parameter.lexical_level,
-                                               symb_pter->values.parameter.offset);
-              break;
-            default:
-              printf("ERROR: INVALID CATEGORY!\n");
-              return -1;
-          }
+          assemble_read_write_instruction(temp_str, "CRVL", symb_pter);
           geraCodigo(NULL, temp_str);
           } 
           ;

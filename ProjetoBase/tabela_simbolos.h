@@ -101,5 +101,6 @@ int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
 int remove_local_vars(symbol_table * table);
 symbol * find_identifier(symbol_table * table, char * identifier);
+void assemble_read_write_instruction(char * temp_str, const char * instruction, symbol * symp_pter);
 
 #endif /*TABELA_SIMBOLOS_H*/

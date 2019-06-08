@@ -539,3 +539,19 @@ symbol * find_identifier(symbol_table * table, char * identifier) {
   }
   return &(table->symbols[idx]);
 }
+
+
+void assemble_read_write_instruction(char * temp_str, const char * instruction, symbol * symb_pter) {
+  switch(symb_pter->category) {
+    case VARIABLE:
+      sprintf(temp_str, "%s %d, %d", instruction,
+                                       symb_pter->values.variable.lexical_level,
+                                       symb_pter->values.variable.offset);
+      break;
+    case PARAMETER:
+      sprintf(temp_str, "%s %hd, %hd", instruction,
+                                       symb_pter->values.parameter.lexical_level,
+                                       symb_pter->values.parameter.offset);
+      break;
+    }
+}
