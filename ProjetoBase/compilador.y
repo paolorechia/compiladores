@@ -13,8 +13,6 @@
 #include "tabela_simbolos.h"
 #include "pilhas_auxiliares.h"
 
-#define CHECK_TYPE 
-
 
 int num_vars;
 int param_num = 0;
@@ -401,6 +399,7 @@ num: NUMERO {
               push_type_stack(&var_type_stack, INTEGER);
               geraCodigo(NULL, temp_str);
             }
+
 ;
 
 

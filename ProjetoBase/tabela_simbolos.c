@@ -155,10 +155,10 @@ int insert_table(symbol_table * table, symbol new_symbol){
 }
 
 
-// fix list memory list here
+// fix list memory here (08062019: check if fix worked)
 int remove_table(symbol_table * table, int number_to_remove){
-  if (number_to_remove <= 0 || number_to_remove > table->idx + 1) {
-    return -2; 
+  if (table->idx <= -1 || number_to_remove <= 0 || number_to_remove > table->idx + 1) {
+    return -1; 
   }
   int i; 
   int idx = table->idx;
@@ -167,11 +167,8 @@ int remove_table(symbol_table * table, int number_to_remove){
       l_free(table->symbols[i].values.procedure.parameter_list);
     }
   }
-  if (table->idx > -1) {
-    table->idx -= number_to_remove;
-    return 0;
-  }
-  return -1;
+  table->idx -= number_to_remove;
+  return 0;
 }
 
 int search_table(symbol_table * table, char id[TAM_TOKEN]){
