@@ -121,6 +121,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         geraCodigo(label_pter, "NADA");
                         lexical_level--;
                         pop_istack(&offset_stack);
+                        print_table(table);
                       }
 ;
 
@@ -149,7 +150,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                       }
                       DOIS_PONTOS IDENT {
                         /* Acrescentar retorno de funcao na tabela simbolos */
-                        update_function_return_type(table, token);
+                        if (update_function_return_type(table, token) == -1) return -1;
                       } PONTO_E_VIRGULA 
                       bloco {
                         print_table(table);
@@ -183,7 +184,7 @@ parte_declara_vars:  var
 ;
 
 
-var         : { } VAR declara_vars
+var         : { } VAR declara_vars {  } 
             |
 ;
 
@@ -196,7 +197,7 @@ declara_var : { }
               tipo 
               { /* AMEM */
                 num_vars = update_var_type(table, token);
-                sprintf(temp_str, "AMEN %d", num_vars);
+                sprintf(temp_str, "AMEM %d", num_vars);
                 geraCodigo (NULL, temp_str); 
               }
               PONTO_E_VIRGULA

@@ -166,6 +166,7 @@ int insert_table(symbol_table * table, symbol new_symbol){
       /*TODO: check if this part is OK */
       saved_symbol->values.function.return_variable = malloc(sizeof(fvariable));
       saved_symbol->values.function.return_variable->lexical_level = new_symbol.values.function.lexical_level;
+      saved_symbol->values.function.return_variable->type = UNDEFINED;
       saved_symbol->values.function.return_variable->offset = -1;
       saved_symbol->values.function.parameter_list = l_init(); 
       l_copy(new_symbol.values.function.parameter_list, saved_symbol->values.function.parameter_list);
@@ -380,10 +381,9 @@ void print_procedure_symbol(symbol s) {
 }
 
 void print_function_symbol(symbol s) {
-  printf("Wut\n");
   thead * parameter_list = s.values.function.parameter_list;
   char return_type_str[32];
-  switch(s.values.function.return_variable->variable_type) {
+  switch(s.values.function.return_variable->type) {
     case INTEGER:
       strcpy(return_type_str, "INTEGER");
       break;
@@ -430,9 +430,9 @@ void print_function_symbol(symbol s) {
   }
   char label_string[LABEL_MAX_SIZE];
   label_to_string(s.values.function.label, (char * ) &label_string);
-  printf("| %s | FUNCTION | lexical_level: %d | label: %s | return_type: %s | params: %s\n",
+  printf("| %s | FUNCTION | lexical_level: %d | label: %s | return_type: %s | return_offset: %d | params: %s\n",
             s.identifier, s.values.function.lexical_level, label_string,
-            return_type_str, params_string);
+            return_type_str, s.values.function.return_variable->offset, params_string);
 }
 
 
@@ -500,13 +500,27 @@ void insert_function(symbol_table * table, char * ident_token, int lexical_level
   free(new_symbol.values.function.return_variable);
 }
 
+/* TODO -- fix */
 int update_function_return_type(symbol_table * table, char * return_type_token) {
   VariableType var_type = parse_var_type(return_type_token);
   if (var_type == -1) return -1;
-  /* TODO */
-  /* find last declared function symbol (IMPLEMENT)*/
+  /* find last declared function symbol*/
+  int idx = -1;
+  int i = table->idx;
+  while (i >= 0 && idx == -1) {
+    if (table->symbols[i].category == FUNCTION) {
+      idx = i;
+    }
+    i--;
+  }
+  if (idx == -1) { 
+    printf("ERROR: function symbol not found\n");
+    return -1;
+  }
+  symbol function_symb = table->symbols[idx];
   /* update function symbol variable with return type, offset and all that */
-
+  function_symb.values.function.return_variable->offset = -(l_size(function_symb.values.function.parameter_list) + 4);
+  function_symb.values.function.return_variable->type = var_type;
 }
 
 
@@ -535,7 +549,7 @@ int parse_var_type(char * token) {
   } else if (strcmp(parsed_token, boolean) == 0) {
     var_type = BOOLEAN;
   } else {
-    printf("ERROR: Invalid variable type: %s!!! Must be either integer or boolean\n", token);
+    printf("ERROR: Invalid variable type: '%s'. Must be either '%s' or '%s'\n", token, integer, boolean);
     return -1;
   }
   return var_type;

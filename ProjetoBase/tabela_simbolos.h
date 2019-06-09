@@ -27,7 +27,7 @@ typedef struct head{
 typedef struct fvariable {
   int lexical_level;
   int offset;
-  VariableType variable_type;
+  VariableType type;
 } fvariable;
 
 /* Proper Symbol Table struct */
@@ -44,8 +44,8 @@ typedef union level {
     ParameterType parameter_type;
   } parameter;
   struct procedure {
-    int lexical_level;
-    int label;
+    short lexical_level;
+    short label;
     thead * parameter_list;
   } procedure;
   struct function {
