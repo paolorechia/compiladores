@@ -475,9 +475,19 @@ elemento: num |
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
           if (current_param_type == BYREFERENCE) {
-            if (assemble_read_write_instruction(temp_str, "CREN", symb_pter) == -1) return -1;
+            if ((symb_pter->category == PARAMETER && symb_pter->values.parameter.parameter_type == BYVAL) ||
+                 symb_pter->category == VARIABLE) {
+              if (assemble_read_write_instruction(temp_str, "CREN", symb_pter) == -1) return -1;
+            } else {
+              if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
+            }
           } else {
-            if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
+            if (symb_pter->category == PARAMETER && symb_pter->values.parameter.parameter_type == BYREFERENCE) {
+              if (assemble_read_write_instruction(temp_str, "CRVI", symb_pter) == -1) return -1;
+            }
+            else {
+              if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
+            }
           }
           geraCodigo(NULL, temp_str);
           } 
