@@ -66,6 +66,7 @@ typedef struct {
 
 /* Linked list functions */
 thead * l_init();
+tnode * pop_first(thead * head); // QUEUE pop
 void l_insert(thead *, char id[TAM_TOKEN], VariableType, ParameterType);
 int l_copy(thead * origin, thead * destination);
 void l_print(thead * head);
@@ -101,6 +102,7 @@ int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
 int remove_local_vars(symbol_table * table);
 symbol * find_identifier(symbol_table * table, char * identifier);
-void assemble_read_write_instruction(char * temp_str, const char * instruction, symbol * symp_pter);
+int assemble_read_write_instruction(char * temp_str, const char * instruction, symbol * symp_pter);
+int check_symbol_category(symbol * symb_pter, CategoryType cat_type);
 
 #endif /*TABELA_SIMBOLOS_H*/

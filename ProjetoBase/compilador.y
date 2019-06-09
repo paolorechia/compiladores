@@ -28,6 +28,7 @@ char last_instruction[TAM_TOKEN];
 char temp_str[TAM_TOKEN];
 
 thead * last_param_list;
+thead * caller_param_list;
 
 symbol new_symbol;
 symbol * symb_pter;
@@ -135,13 +136,6 @@ parametro: IDENT {
             l_insert(last_param_list, last_identifier, tokenType, BYREFERENCE);
            }
 
-/*
-  l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYVAL);
-  l_insert(new_symbol.values.procedure.parameter_list, BOOLEAN, BYVAL);
-  l_insert(new_symbol.values.procedure.parameter_list, INTEGER, BYREFERENCE);
-*/
-
-
 parte_declara_vars:  var 
 ;
 
@@ -213,13 +207,13 @@ leitura: READ ABRE_PARENTESES lista_leitura FECHA_PARENTESES PONTO_E_VIRGULA
 lista_leitura: lista_leitura VIRGULA variavel { 
                     symb_pter = pop_symbol_stack(&symbol_stack);
                     geraCodigo(NULL, "LEIT");
-                    assemble_read_write_instruction(temp_str, "ARMZ", symb_pter);
+                    if (assemble_read_write_instruction(temp_str, "ARMZ", symb_pter) == -1) return -1;
                     geraCodigo(NULL, temp_str);
                     } 
                     | variavel {
                       symb_pter = pop_symbol_stack(&symbol_stack);
                       geraCodigo(NULL, "LEIT");
-                      assemble_read_write_instruction(temp_str, "ARMZ", symb_pter);
+                    if (assemble_read_write_instruction(temp_str, "ARMZ", symb_pter) == -1) return -1;
                       geraCodigo(NULL, temp_str);
                     } 
 
@@ -297,12 +291,7 @@ chamada_sem_parametro: PONTO_E_VIRGULA {
     printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
     return -1;
   } else {
-      if (symb_pter->category != PROCEDURE) {
-        char category[255];
-        category_type_to_string(symb_pter->category, (char *) &category);
-        printf("ERROR: Symbol %s is not a procedure! Declared as: %s\n", symb_pter->identifier, category);
-        return -1;
-      }
+      if (check_symbol_category(symb_pter, PROCEDURE) == -1) return -1;
       char label[55];
       label_to_string(symb_pter->values.procedure.label, label);
       sprintf(temp_str, "CHPR %s, %d", label, lexical_level);
@@ -311,11 +300,65 @@ chamada_sem_parametro: PONTO_E_VIRGULA {
 }
 ;
 
-chamada_com_parametros: ABRE_PARENTESES lista_parametros FECHA_PARENTESES {
+lista_parametros_chamada: lista_parametros_chamada VIRGULA parametro_chamada | parametro_chamada
 
+parametro_chamada: parametro_chamada_ref | parametro_chamada_val
 
+/* Finalizar esta parte */
+parametro_chamada_ref: VAR IDENT {
+            symb_pter = find_identifier(table, token); 
+            if (symb_pter == NULL) {
+              printf("ERROR: variable%s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+              return -1;
+              l_free(last_param_list);
+            } else {
+                if (check_symbol_category(symb_pter, VARIABLE) == -1) {
+                  l_free(last_param_list);
+                  return -1;
+                }
+            }
+}
+;
 
-};
+parametro_chamada_val: expr { 
+  tnode * list_node = pop_first(caller_param_list);
+  if (list_node == NULL) {
+    printf("ERROR: procedure signature mismatch. Expecting %d parameters\n", l_size(last_param_list));
+    free(list_node);
+    free(caller_param_list);
+    return -1;
+  }
+  pop_type_stack(&var_type_stack);
+  free(list_node);
+}
+;
+
+chamada_com_parametros: ABRE_PARENTESES {
+    symb_pter = find_identifier(table, last_identifier); 
+    if (check_symbol_category(symb_pter, PROCEDURE) == -1) return -1;
+    last_param_list = symb_pter->values.procedure.parameter_list;
+    caller_param_list = l_init();
+    l_copy(last_param_list, caller_param_list);
+  } 
+  lista_parametros_chamada {
+    printf("GET TO WORK!\n");
+  }
+  FECHA_PARENTESES {
+    l_free(caller_param_list);
+    symb_pter = find_identifier(table, last_identifier); 
+    if (symb_pter == NULL) {
+      printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+      return -1;
+    } else {
+      if (check_symbol_category(symb_pter, PROCEDURE) == -1) return -1;
+        char label[55];
+        label_to_string(symb_pter->values.procedure.label, label);
+        sprintf(temp_str, "CHPR %s, %d", label, lexical_level);
+        geraCodigo(NULL, temp_str);
+    }
+  }
+  PONTO_E_VIRGULA
+;
 
 atribuicao: 
             DOIS_PONTOS_IGUAL {
@@ -340,7 +383,7 @@ atribuicao:
               /* Desempilha endereco de memoria e gera ARMZ */ 
                 if (type_check(&var_type_stack, nl) == -1) return -1;
                 symb_pter = pop_symbol_stack(&symbol_stack);
-                assemble_read_write_instruction(temp_str, "ARMZ", symb_pter);
+                if (assemble_read_write_instruction(temp_str, "ARMZ", symb_pter) == -1) return -1;
                 geraCodigo(NULL, temp_str);
             }
               ;
@@ -401,7 +444,7 @@ elemento: num |
           variavel {
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
-          assemble_read_write_instruction(temp_str, "CRVL", symb_pter);
+          if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
           geraCodigo(NULL, temp_str);
           } 
           ;
@@ -464,6 +507,7 @@ main (int argc, char** argv) {
    symbol new_symbol;
    init_type_stack(&var_type_stack);
    init_istack(&offset_stack);
+   init_symbol_stack(&symbol_stack);
  
 
    yyin=fp;

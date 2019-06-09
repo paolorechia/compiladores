@@ -12,6 +12,18 @@ thead * l_init(){
     head->size = 0;
     return head;
 }
+
+
+/* Caller must free returned node */
+/* FIFO pop */
+tnode * pop_first(thead * head) {
+  tnode * node = head->node->nxt;
+  if (node != NULL) {
+    head->node->nxt = node->nxt;
+  }
+  return node;
+}
+
 void l_insert(thead * head, char identifier[TAM_TOKEN], VariableType var_type, ParameterType param_type) {
     tnode * node = head->node;
     while (node->nxt != NULL){
@@ -541,17 +553,33 @@ symbol * find_identifier(symbol_table * table, char * identifier) {
 }
 
 
-void assemble_read_write_instruction(char * temp_str, const char * instruction, symbol * symb_pter) {
+int assemble_read_write_instruction(char * temp_str, const char * instruction, symbol * symb_pter) {
   switch(symb_pter->category) {
-    case VARIABLE:
-      sprintf(temp_str, "%s %d, %d", instruction,
+      case VARIABLE:
+        sprintf(temp_str, "%s %d, %d", instruction,
                                        symb_pter->values.variable.lexical_level,
                                        symb_pter->values.variable.offset);
       break;
-    case PARAMETER:
-      sprintf(temp_str, "%s %hd, %hd", instruction,
+      case PARAMETER:
+        sprintf(temp_str, "%s %hd, %hd", instruction,
                                        symb_pter->values.parameter.lexical_level,
                                        symb_pter->values.parameter.offset);
       break;
+      default:
+        printf("ERROR: Invalid Category!\n");
+        return -1;
     }
+    return 0;
+}
+
+int check_symbol_category(symbol * symb_pter, CategoryType cat_type) {
+      if (symb_pter->category != cat_type) {
+        char category[255];
+        char expected_category[255];
+        category_type_to_string(symb_pter->category, (char *) &category);
+        category_type_to_string(cat_type, (char *) &expected_category);
+        printf("ERROR: Symbol %s is not a %s! Declared as: %s\n", symb_pter->identifier, category, expected_category);
+        return -1;
+      }
+      return 0;
 }
