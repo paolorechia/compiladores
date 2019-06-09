@@ -159,6 +159,7 @@ int insert_table(symbol_table * table, symbol new_symbol){
       saved_symbol->values.procedure.label = new_symbol.values.procedure.label;
       saved_symbol->values.procedure.parameter_list = l_init(); 
       l_copy(new_symbol.values.procedure.parameter_list, saved_symbol->values.procedure.parameter_list);
+      break;
     case FUNCTION:
       saved_symbol->values.function.lexical_level = new_symbol.values.function.lexical_level;
       saved_symbol->values.function.label = new_symbol.values.function.label;
@@ -168,6 +169,7 @@ int insert_table(symbol_table * table, symbol new_symbol){
       saved_symbol->values.function.return_variable->offset = -1;
       saved_symbol->values.function.parameter_list = l_init(); 
       l_copy(new_symbol.values.function.parameter_list, saved_symbol->values.function.parameter_list);
+      break;
   }
   return 0;
 }
@@ -451,7 +453,7 @@ void insert_procedure(symbol_table * table, char * ident_token, int lexical_leve
   new_symbol.category = PROCEDURE;
   strcpy(new_symbol.identifier, ident_token);
   new_symbol.values.procedure.lexical_level = lexical_level;
-  new_symbol.values.procedure.label =  label_to_integer(label);
+  new_symbol.values.procedure.label = label_to_integer(label);
   new_symbol.values.procedure.parameter_list = l_init();
   insert_table(table, new_symbol);
 }
