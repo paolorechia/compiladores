@@ -292,6 +292,11 @@ chamada_sem_parametro: PONTO_E_VIRGULA {
     return -1;
   } else {
       if (check_symbol_category(symb_pter, PROCEDURE) == -1) return -1;
+      last_param_list = symb_pter->values.procedure.parameter_list;
+      if (l_size(last_param_list) > 0) {
+        printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+        return -1;
+      }
       char label[55];
       label_to_string(symb_pter->values.procedure.label, label);
       sprintf(temp_str, "CHPR %s, %d", label, lexical_level);
@@ -355,10 +360,9 @@ chamada_com_parametros: ABRE_PARENTESES {
       l_free(caller_param_list);
       return -1;
     }
-    printf("GET TO WORK!\n");
+    l_free(caller_param_list);
   }
   FECHA_PARENTESES {
-    l_free(caller_param_list);
     symb_pter = find_identifier(table, last_identifier); 
     if (symb_pter == NULL) {
       printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
@@ -537,7 +541,7 @@ main (int argc, char** argv) {
     printf("%s\n", buffer);
    }
 
-   print_type_stack(&var_type_stack);
+   // print_type_stack(&var_type_stack);
    free_table(table);
    fclose(fp);
    return 0;
