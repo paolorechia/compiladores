@@ -131,6 +131,8 @@ symbol_table * malloc_table(int table_max_size) {
 }
 
 void free_table(symbol_table * table) {
+  /* TODO */
+  /* Free variable from function symbol */
   free(table->symbols);
   free(table);
 }
@@ -160,7 +162,10 @@ int insert_table(symbol_table * table, symbol new_symbol){
     case FUNCTION:
       saved_symbol->values.function.lexical_level = new_symbol.values.function.lexical_level;
       saved_symbol->values.function.label = new_symbol.values.function.label;
-      saved_symbol->values.function.return_type = new_symbol.values.function.return_type;
+      /*TODO: check if this part is OK */
+      saved_symbol->values.function.return_variable = malloc(sizeof(fvariable));
+      saved_symbol->values.function.return_variable->lexical_level = new_symbol.values.function.lexical_level;
+      saved_symbol->values.function.return_variable->offset = -1;
       saved_symbol->values.function.parameter_list = l_init(); 
       l_copy(new_symbol.values.function.parameter_list, saved_symbol->values.function.parameter_list);
   }
@@ -373,9 +378,10 @@ void print_procedure_symbol(symbol s) {
 }
 
 void print_function_symbol(symbol s) {
+  printf("Wut\n");
   thead * parameter_list = s.values.function.parameter_list;
   char return_type_str[32];
-  switch(s.values.function.return_type) {
+  switch(s.values.function.return_variable->variable_type) {
     case INTEGER:
       strcpy(return_type_str, "INTEGER");
       break;
@@ -463,8 +469,7 @@ VariableType insert_parameter(symbol_table * table, char * ident_token, int lexi
   return var_type;
 }
 
-/* Properly implement this function */
-int update_procedure_with_parameters(symbol_table * table) {
+int update_subroutine_parameters(symbol_table * table) {
   short current_offset = -4;
   int idx = table->idx;
   symbol * current_symbol;
@@ -478,6 +483,28 @@ int update_procedure_with_parameters(symbol_table * table) {
     current_symbol = &(table->symbols[idx]);
   }
   return updated_vars;
+}
+
+void insert_function(symbol_table * table, char * ident_token, int lexical_level, char * label) {
+  symbol new_symbol;
+  new_symbol.category = FUNCTION;
+  strcpy(new_symbol.identifier, ident_token);
+  new_symbol.values.function.lexical_level = lexical_level;
+  new_symbol.values.function.label =  label_to_integer(label);
+  /* TODO -- check if OK*/
+  new_symbol.values.function.return_variable = malloc(sizeof(fvariable));
+  new_symbol.values.function.parameter_list = l_init();
+  insert_table(table, new_symbol);
+  free(new_symbol.values.function.return_variable);
+}
+
+int update_function_return_type(symbol_table * table, char * return_type_token) {
+  VariableType var_type = parse_var_type(return_type_token);
+  if (var_type == -1) return -1;
+  /* TODO */
+  /* find last declared function symbol (IMPLEMENT)*/
+  /* update function symbol variable with return type, offset and all that */
+
 }
 
 

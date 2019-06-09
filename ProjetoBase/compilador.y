@@ -81,9 +81,11 @@ bloco       :
               parte_declara_vars declara_subrotina comando_composto
 ;
 
-declara_subrotina: lista_procedimentos |
+declara_subrotina: lista_subrotinas |
+;
 
-lista_procedimentos: lista_procedimentos declara_procedimento | declara_procedimento
+lista_subrotinas: lista_subrotinas declara_procedimento | declara_procedimento | lista_subrotinas declara_funcao | declara_funcao
+;
 
 declara_procedimento: PROCEDURE_TOKEN IDENT {
                         lexical_level++;
@@ -103,7 +105,11 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         last_param_list = peek_table(table)->values.procedure.parameter_list;
                         push_istack(&offset_stack, 0);
                       }
-                      lp PONTO_E_VIRGULA 
+                      lp {
+                        update_subroutine_parameters(table);
+                        print_table(table);
+                      }
+                      PONTO_E_VIRGULA 
                       bloco {
                         print_table(table);
                         sprintf(temp_str, "DMEM %d", remove_local_vars(table));
@@ -118,11 +124,48 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                       }
 ;
 
-lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES { 
-                                      // print_table(table);
-                                      update_procedure_with_parameters(table);
-                                      print_table(table);
-                                      } |
+/* TODO: fix this block */
+declara_funcao: FUNCTION_TOKEN IDENT {
+                        lexical_level++;
+
+                        generate_label(&label_counter, (char * )label);
+                        push_label_stack(&label_stack, label);
+                        sprintf(temp_str, "DSVS %s", label);
+                        geraCodigo(NULL, temp_str);
+
+                        generate_label(&label_counter, (char * )label);
+                        push_label_stack(&label_stack, label);
+                        sprintf(temp_str, "ENPR %d", lexical_level);
+                        label_pter = pop_label_stack(&label_stack);
+                        geraCodigo(label_pter, temp_str);
+
+                        insert_function(table, token, lexical_level, label);
+                        last_param_list = peek_table(table)->values.function.parameter_list;
+                        push_istack(&offset_stack, 0);
+                      }
+                      lp {
+                        update_subroutine_parameters(table);
+                        print_table(table);
+                      }
+                      DOIS_PONTOS IDENT {
+                        /* Acrescentar retorno de funcao na tabela simbolos */
+                        update_function_return_type(table, token);
+                      } PONTO_E_VIRGULA 
+                      bloco {
+                        print_table(table);
+                        sprintf(temp_str, "DMEM %d", remove_local_vars(table));
+                        geraCodigo(NULL, temp_str);
+                        // implementar pilha ou algo mais elaborado para param_num quando acrescentar parametros
+                        sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
+                        geraCodigo(NULL, temp_str);
+                        label_pter = pop_label_stack(&label_stack); 
+                        geraCodigo(label_pter, "NADA");
+                        lexical_level--;
+                        pop_istack(&offset_stack);
+                      }
+;
+
+lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES |
 ;
 
 lista_parametros: lista_parametros VIRGULA parametro | parametro
@@ -338,31 +381,6 @@ chamada_com_parametros: ABRE_PARENTESES {
 
 lista_parametros_chamada: lista_parametros_chamada VIRGULA parametro_chamada | parametro_chamada;
 
-
-/* Finalizar esta parte */
-/*
-parametro_chamada {
-            printf("BY REF PARAMETER\n");
-            symb_pter = pop_symbol_stack(&symbol_stack);
-            switch(symb_pter->category) {
-              case VARIABLE:
-                assemble_read_write_instruction(temp_str, "CREN", symb_pter);
-                break;
-              case PARAMETER:
-                if (symb_pter->values.parameter.parameter_type == BYVAL) {
-                  assemble_read_write_instruction(temp_str, "CREN", symb_pter);
-                } else { // by reference
-                  assemble_read_write_instruction(temp_str, "CRVL", symb_pter);
-                }
-                break;
-              default:
-                printf("ERROR: invalid parameter passed by reference\n");
-                l_free(last_param_list);
-                return -1;
-              }
-         } 
-;
-*/
 
 parametro_chamada: {
     list_node = pop_first(caller_param_list);

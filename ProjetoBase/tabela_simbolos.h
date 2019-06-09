@@ -24,6 +24,12 @@ typedef struct head{
     int size;
 } thead;
 
+typedef struct fvariable {
+  int lexical_level;
+  int offset;
+  VariableType variable_type;
+} fvariable;
+
 /* Proper Symbol Table struct */
 typedef union level {
   struct variable {
@@ -43,9 +49,10 @@ typedef union level {
     thead * parameter_list;
   } procedure;
   struct function {
+    /* TODO: fix */
     short lexical_level;
     short label;
-    VariableType return_type;
+    fvariable * return_variable;
     thead * parameter_list;
   } function;
 } symbol_union;
@@ -96,8 +103,10 @@ int label_to_integer(char * input_str);
 /* Symbol token functions / table higher-level functions */
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
 void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label);
-int update_procedure_with_parameters(symbol_table * table);
+int update_subroutine_parameters(symbol_table * table);
 VariableType insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type);
+void insert_function(symbol_table * table, char * ident_token, int lexical_level, char * label);
+int update_function_return_type(symbol_table * table, char * token);
 int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
 int remove_local_vars(symbol_table * table);
