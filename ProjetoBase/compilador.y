@@ -322,13 +322,22 @@ parametro_chamada_ref: VAR IDENT {
 
 parametro_chamada_val: expr { 
   tnode * list_node = pop_first(caller_param_list);
+  printf("%d\n", l_size(caller_param_list));
   if (list_node == NULL) {
-    printf("ERROR: procedure signature mismatch. Expecting %d parameters\n", l_size(last_param_list));
+    printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
     free(list_node);
     free(caller_param_list);
     return -1;
   }
-  pop_type_stack(&var_type_stack);
+  push_type_stack(&var_type_stack, list_node->variable_type);
+  if (type_check(&var_type_stack, nl) == -1) {
+    char var_type_str[255];
+    variable_type_to_string(list_node->variable_type, var_type_str);
+    printf("ERROR: procedure signature mismatch. Expecting type %s for parameter: %s\n", var_type_str, list_node->identifier);
+    free(list_node);
+    free(caller_param_list);
+    return -1;
+  }
   free(list_node);
 }
 ;
@@ -341,6 +350,11 @@ chamada_com_parametros: ABRE_PARENTESES {
     l_copy(last_param_list, caller_param_list);
   } 
   lista_parametros_chamada {
+    if (l_size(caller_param_list) > 0) {
+      printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+      l_free(caller_param_list);
+      return -1;
+    }
     printf("GET TO WORK!\n");
   }
   FECHA_PARENTESES {

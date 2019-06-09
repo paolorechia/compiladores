@@ -20,6 +20,7 @@ tnode * pop_first(thead * head) {
   tnode * node = head->node->nxt;
   if (node != NULL) {
     head->node->nxt = node->nxt;
+    head->size--;
   }
   return node;
 }
