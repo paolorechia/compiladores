@@ -393,18 +393,22 @@ parametro_chamada: {
 atribuicao: 
             DOIS_PONTOS_IGUAL {
                 symb_pter = find_identifier(table, last_identifier); 
-                if (symb_pter != NULL) {
-                  push_symbol_stack(&symbol_stack, *symb_pter);
-                  push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
-                  if (symb_pter->category != VARIABLE && symb_pter->category != PARAMETER) {
-                    char category[255];
-                    category_type_to_string(symb_pter->category, (char *) &category);
-                    printf("ERROR: Symbol %s is not a variable or a parameter! Declared as: %s\n", symb_pter->identifier, category);
-                    return -1;
-                  }
-                } else {
+                if (symb_pter == NULL) {
                   printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
                   return -1;
+                }
+                if (symb_pter->category != VARIABLE && symb_pter->category != PARAMETER) {
+                  char category[255];
+                  category_type_to_string(symb_pter->category, (char *) &category);
+                  printf("ERROR: Symbol %s is not a variable or a parameter! Declared as: %s\n", symb_pter->identifier, category);
+                  return -1;
+                }
+                if (symb_pter->category == VARIABLE) {
+                  push_symbol_stack(&symbol_stack, *symb_pter);
+                  push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
+                } else {
+                  push_symbol_stack(&symbol_stack, *symb_pter);
+                  push_type_stack(&var_type_stack, symb_pter->values.parameter.variable_type);
                 }
               }
             expr { /* Gera sequencia de operacoes, confere tipos */ }
@@ -413,7 +417,13 @@ atribuicao:
               /* Desempilha endereco de memoria e gera ARMZ/ARMI */ 
                 if (type_check(&var_type_stack, nl) == -1) return -1;
                 symb_pter = pop_symbol_stack(&symbol_stack);
-                if (assemble_read_write_instruction(temp_str, "ARMZ", symb_pter) == -1) return -1;
+                if (symb_pter->category == VARIABLE ||
+                   (symb_pter->category == PARAMETER && symb_pter->values.parameter.parameter_type == BYVAL)) {
+                  if (assemble_read_write_instruction(temp_str, "ARMZ", symb_pter) == -1) return -1;
+                } else if (symb_pter->category == PARAMETER &&
+                           symb_pter->values.parameter.parameter_type == BYREFERENCE) {
+                  if (assemble_read_write_instruction(temp_str, "ARMI", symb_pter) == -1) return -1; 
+                }
                 geraCodigo(NULL, temp_str);
             }
               ;
@@ -516,6 +526,7 @@ variavel: IDENT {
         break;
       case PARAMETER:
         push_symbol_stack(&symbol_stack, *symb_pter);
+        push_type_stack(&var_type_stack, symb_pter->values.parameter.variable_type);
         break;
       default:
         printf("ERROR: Invalid Category!\n");
