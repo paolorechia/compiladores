@@ -9,7 +9,7 @@
 
 typedef enum CategoryType {VARIABLE, FUNCTION, PROCEDURE, PARAMETER} CategoryType;
 typedef enum VariableType {INTEGER, BOOLEAN, UNDEFINED} VariableType;
-typedef enum ParameterType {BYVAL, BYREFERENCE} ParameterType;
+typedef enum ParameterType {BYVAL, BYREFERENCE, NULL_PARAM} ParameterType;
 
 /* Linked list struct */
 typedef struct cel_struct{

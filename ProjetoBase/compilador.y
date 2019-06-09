@@ -29,6 +29,8 @@ char temp_str[TAM_TOKEN];
 
 thead * last_param_list;
 thead * caller_param_list;
+tnode * list_node; 
+ParameterType current_param_type = NULL_PARAM;
 
 symbol new_symbol;
 symbol * symb_pter;
@@ -125,13 +127,11 @@ lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES {
 
 lista_parametros: lista_parametros VIRGULA parametro | parametro
 
-parametro: IDENT { 
-            strcpy(last_identifier, token);
-           } DOIS_PONTOS tipo {
+parametro: IDENT {  strcpy(last_identifier, token); } DOIS_PONTOS tipo {
             VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
             l_insert(last_param_list, last_identifier, tokenType, BYVAL);
            } 
-           | VAR IDENT tipo {
+           | VAR IDENT  { strcpy(last_identifier, token); } DOIS_PONTOS tipo {
             VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYREFERENCE);
             l_insert(last_param_list, last_identifier, tokenType, BYREFERENCE);
            }
@@ -255,14 +255,14 @@ cond_else: ELSE
            comando_sem_rotulo_ou_composto
            | %prec LOWER_THAN_ELSE
 
-comando_repetitivo: WHILE { 
+comando_repetitivo: WHILE {
                             generate_label(&label_counter, (char * )label);
                             geraCodigo(label, "NADA");
                             push_label_stack(&label_stack, label);
                             generate_label(&label_counter, (char * )label);
                             push_label_stack(&label_stack, label);
-                            }
-                    expr { 
+                          }
+                    expr {
                             label_pter = peek_label_stack(&label_stack); 
                             sprintf(temp_str, "DSVF %s", label_pter);
                             geraCodigo(NULL, temp_str);
@@ -305,48 +305,6 @@ chamada_sem_parametro: PONTO_E_VIRGULA {
 }
 ;
 
-lista_parametros_chamada: lista_parametros_chamada VIRGULA parametro_chamada | parametro_chamada
-
-parametro_chamada: parametro_chamada_ref | parametro_chamada_val
-
-/* Finalizar esta parte */
-parametro_chamada_ref: VAR IDENT {
-            symb_pter = find_identifier(table, token); 
-            if (symb_pter == NULL) {
-              printf("ERROR: variable%s was not found! Double check that you've declared it!\n", symb_pter->identifier);
-              return -1;
-              l_free(last_param_list);
-            } else {
-                if (check_symbol_category(symb_pter, VARIABLE) == -1) {
-                  l_free(last_param_list);
-                  return -1;
-                }
-            }
-}
-;
-
-parametro_chamada_val: expr { 
-  tnode * list_node = pop_first(caller_param_list);
-  printf("%d\n", l_size(caller_param_list));
-  if (list_node == NULL) {
-    printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
-    free(list_node);
-    free(caller_param_list);
-    return -1;
-  }
-  push_type_stack(&var_type_stack, list_node->variable_type);
-  if (type_check(&var_type_stack, nl) == -1) {
-    char var_type_str[255];
-    variable_type_to_string(list_node->variable_type, var_type_str);
-    printf("ERROR: procedure signature mismatch. Expecting type %s for parameter: %s\n", var_type_str, list_node->identifier);
-    free(list_node);
-    free(caller_param_list);
-    return -1;
-  }
-  free(list_node);
-}
-;
-
 chamada_com_parametros: ABRE_PARENTESES {
     symb_pter = find_identifier(table, last_identifier); 
     if (check_symbol_category(symb_pter, PROCEDURE) == -1) return -1;
@@ -378,6 +336,60 @@ chamada_com_parametros: ABRE_PARENTESES {
   PONTO_E_VIRGULA
 ;
 
+lista_parametros_chamada: lista_parametros_chamada VIRGULA parametro_chamada | parametro_chamada;
+
+
+/* Finalizar esta parte */
+/*
+parametro_chamada {
+            printf("BY REF PARAMETER\n");
+            symb_pter = pop_symbol_stack(&symbol_stack);
+            switch(symb_pter->category) {
+              case VARIABLE:
+                assemble_read_write_instruction(temp_str, "CREN", symb_pter);
+                break;
+              case PARAMETER:
+                if (symb_pter->values.parameter.parameter_type == BYVAL) {
+                  assemble_read_write_instruction(temp_str, "CREN", symb_pter);
+                } else { // by reference
+                  assemble_read_write_instruction(temp_str, "CRVL", symb_pter);
+                }
+                break;
+              default:
+                printf("ERROR: invalid parameter passed by reference\n");
+                l_free(last_param_list);
+                return -1;
+              }
+         } 
+;
+*/
+
+parametro_chamada: {
+    list_node = pop_first(caller_param_list);
+    if (list_node == NULL) {
+      printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+      free(list_node);
+      free(caller_param_list);
+      return -1;
+    }
+    current_param_type = list_node->parameter_type;
+  }
+  expr { 
+  push_type_stack(&var_type_stack, list_node->variable_type);
+  if (type_check(&var_type_stack, nl) == -1) {
+    char var_type_str[255];
+    variable_type_to_string(list_node->variable_type, var_type_str);
+    printf("ERROR: procedure signature mismatch. Expecting type %s for parameter: %s\n", var_type_str, list_node->identifier);
+    free(list_node);
+    free(caller_param_list);
+    return -1;
+  }
+  current_param_type = NULL_PARAM;
+  free(list_node);
+}
+;
+
+
 atribuicao: 
             DOIS_PONTOS_IGUAL {
                 symb_pter = find_identifier(table, last_identifier); 
@@ -398,7 +410,7 @@ atribuicao:
             expr { /* Gera sequencia de operacoes, confere tipos */ }
             PONTO_E_VIRGULA 
             {
-              /* Desempilha endereco de memoria e gera ARMZ */ 
+              /* Desempilha endereco de memoria e gera ARMZ/ARMI */ 
                 if (type_check(&var_type_stack, nl) == -1) return -1;
                 symb_pter = pop_symbol_stack(&symbol_stack);
                 if (assemble_read_write_instruction(temp_str, "ARMZ", symb_pter) == -1) return -1;
@@ -462,7 +474,11 @@ elemento: num |
           variavel {
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
-          if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
+          if (current_param_type == BYREFERENCE) {
+            if (assemble_read_write_instruction(temp_str, "CREN", symb_pter) == -1) return -1;
+          } else {
+            if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
+          }
           geraCodigo(NULL, temp_str);
           } 
           ;
@@ -479,15 +495,24 @@ num: NUMERO {
 variavel: IDENT { 
   /*Procura variavel na tabela de simbolos e empilha endereco? */ 
     symb_pter = find_identifier(table, token); 
-    if (symb_pter != NULL) {
-      push_symbol_stack(&symbol_stack, *symb_pter);
-      push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
-    } else {
+    if (symb_pter == NULL) {
         printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
         return -1;
     }
-  }
-  ;
+    switch(symb_pter->category) {
+      case VARIABLE:
+        push_symbol_stack(&symbol_stack, *symb_pter);
+        push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
+        break;
+      case PARAMETER:
+        push_symbol_stack(&symbol_stack, *symb_pter);
+        break;
+      default:
+        printf("ERROR: Invalid Category!\n");
+        return -1;
+    }
+}
+;
 
 
 boolean: TRUE { geraCodigo(NULL, "CRCT 1");
