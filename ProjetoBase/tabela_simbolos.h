@@ -2,6 +2,7 @@
 #define TABELA_SIMBOLOS_H
 
 #include "compilador.h"
+#include <stdint.h>
 
 #define MAX_TABLE_SIZE 1024
 #define LABEL_MAX_SIZE 4
@@ -24,35 +25,30 @@ typedef struct head{
     int size;
 } thead;
 
-typedef struct fvariable {
-  int lexical_level;
-  int offset;
-  VariableType type;
-} fvariable;
-
 /* Proper Symbol Table struct */
 typedef union level {
   struct variable {
-    int lexical_level;
-    int offset;
+    int32_t lexical_level;
+    int32_t offset;
     VariableType variable_type;
   } variable;
   struct parameter {
-    short lexical_level;
-    short offset;
+    int16_t lexical_level;
+    int16_t offset;
     VariableType variable_type;
     ParameterType parameter_type;
   } parameter;
   struct procedure {
-    short lexical_level;
-    short label;
+    int32_t lexical_level;
+    int32_t label;
     thead * parameter_list;
   } procedure;
+  /* TODO: fix */
   struct function {
-    /* TODO: fix */
-    short lexical_level;
-    short label;
-    fvariable * return_variable;
+    int8_t lexical_level;
+    int8_t label;
+    int8_t offset;
+    VariableType variable_type;
     thead * parameter_list;
   } function;
 } symbol_union;

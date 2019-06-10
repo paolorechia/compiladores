@@ -132,7 +132,6 @@ symbol_table * malloc_table(int table_max_size) {
 
 void free_table(symbol_table * table) {
   /* TODO */
-  /* Free variable from function symbol */
   free(table->symbols);
   free(table);
 }
@@ -161,16 +160,16 @@ int insert_table(symbol_table * table, symbol new_symbol){
       l_copy(new_symbol.values.procedure.parameter_list, saved_symbol->values.procedure.parameter_list);
       break;
     case FUNCTION:
+    /*TODO: check if this part is OK */
       saved_symbol->values.function.lexical_level = new_symbol.values.function.lexical_level;
       saved_symbol->values.function.label = new_symbol.values.function.label;
-      /*TODO: check if this part is OK */
-      saved_symbol->values.function.return_variable = malloc(sizeof(fvariable));
-      saved_symbol->values.function.return_variable->lexical_level = new_symbol.values.function.lexical_level;
-      saved_symbol->values.function.return_variable->type = UNDEFINED;
-      saved_symbol->values.function.return_variable->offset = -1;
+      saved_symbol->values.function.variable_type = UNDEFINED;
+      saved_symbol->values.function.offset = -1;
       saved_symbol->values.function.parameter_list = l_init(); 
       l_copy(new_symbol.values.function.parameter_list, saved_symbol->values.function.parameter_list);
       break;
+    default:
+      printf("Invalid category\n");
   }
   return 0;
 }
@@ -381,9 +380,11 @@ void print_procedure_symbol(symbol s) {
 }
 
 void print_function_symbol(symbol s) {
+
   thead * parameter_list = s.values.function.parameter_list;
   char return_type_str[32];
-  switch(s.values.function.return_variable->type) {
+  
+  switch(s.values.function.variable_type) {
     case INTEGER:
       strcpy(return_type_str, "INTEGER");
       break;
@@ -432,7 +433,7 @@ void print_function_symbol(symbol s) {
   label_to_string(s.values.function.label, (char * ) &label_string);
   printf("| %s | FUNCTION | lexical_level: %d | label: %s | return_type: %s | return_offset: %d | params: %s\n",
             s.identifier, s.values.function.lexical_level, label_string,
-            return_type_str, s.values.function.return_variable->offset, params_string);
+            return_type_str, s.values.function.offset, params_string);
 }
 
 
@@ -491,17 +492,16 @@ void insert_function(symbol_table * table, char * ident_token, int lexical_level
   symbol new_symbol;
   new_symbol.category = FUNCTION;
   strcpy(new_symbol.identifier, ident_token);
-  new_symbol.values.function.lexical_level = lexical_level;
-  new_symbol.values.function.label =  label_to_integer(label);
   /* TODO -- check if OK*/
-  new_symbol.values.function.return_variable = malloc(sizeof(fvariable));
+  new_symbol.values.function.lexical_level = (short) lexical_level;
+  new_symbol.values.function.label =  (short) label_to_integer(label);
   new_symbol.values.function.parameter_list = l_init();
   insert_table(table, new_symbol);
-  free(new_symbol.values.function.return_variable);
 }
 
 /* TODO -- fix */
 int update_function_return_type(symbol_table * table, char * return_type_token) {
+  printf("%s\n", return_type_token);
   VariableType var_type = parse_var_type(return_type_token);
   if (var_type == -1) return -1;
   /* find last declared function symbol*/
@@ -519,8 +519,8 @@ int update_function_return_type(symbol_table * table, char * return_type_token) 
   }
   symbol function_symb = table->symbols[idx];
   /* update function symbol variable with return type, offset and all that */
-  function_symb.values.function.return_variable->offset = -(l_size(function_symb.values.function.parameter_list) + 4);
-  function_symb.values.function.return_variable->type = var_type;
+  function_symb.values.function.offset = -(l_size(function_symb.values.function.parameter_list) + 4);
+  function_symb.values.function.variable_type = var_type;
 }
 
 

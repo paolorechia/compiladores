@@ -184,7 +184,7 @@ parte_declara_vars:  var
 ;
 
 
-var         : { } VAR declara_vars {  } 
+var         : { } VAR declara_vars { print_table(table); } 
             |
 ;
 
