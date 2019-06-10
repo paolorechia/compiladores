@@ -501,9 +501,9 @@ void insert_function(symbol_table * table, char * ident_token, int lexical_level
 
 /* TODO -- fix */
 int update_function_return_type(symbol_table * table, char * return_type_token) {
-  printf("%s\n", return_type_token);
   VariableType var_type = parse_var_type(return_type_token);
-  printf("%d\n", var_type);
+  char var_type_str[255];
+  variable_type_to_string(var_type, var_type_str);
   if (var_type == -1) return -1;
   /* find last declared function symbol*/
   int idx = -1;
@@ -518,11 +518,10 @@ int update_function_return_type(symbol_table * table, char * return_type_token) 
     printf("ERROR: function symbol not found\n");
     return -1;
   }
-  symbol function_symb = table->symbols[idx];
+  symbol * function_symb = &(table->symbols[idx]);
   /* update function symbol variable with return type, offset and all that */
-  function_symb.values.function.offset = -(l_size(function_symb.values.function.parameter_list) + 4);
-  function_symb.values.function.variable_type = var_type;
-  printf("Updated function symbol?\n");
+  function_symb->values.function.offset = -(l_size(function_symb->values.function.parameter_list) + 4);
+  function_symb->values.function.variable_type = var_type;
 }
 
 

@@ -43,7 +43,6 @@ typedef union level {
     int32_t label;
     thead * parameter_list;
   } procedure;
-  /* TODO: fix */
   struct function {
     int8_t lexical_level;
     int8_t label;

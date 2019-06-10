@@ -151,6 +151,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                       DOIS_PONTOS IDENT {
                         /* Acrescentar retorno de funcao na tabela simbolos */
                         if (update_function_return_type(table, token) == -1) return -1;
+                        printf("WUUUT!\n");
                       } PONTO_E_VIRGULA 
                       bloco {
                         print_table(table);
@@ -416,7 +417,7 @@ atribuicao:
                   printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
                   return -1;
                 }
-                if (symb_pter->category != VARIABLE && symb_pter->category != PARAMETER) {
+                if (symb_pter->category != VARIABLE && symb_pter->category != PARAMETER && symb_pter->category != FUNCTION) {
                   char category[255];
                   category_type_to_string(symb_pter->category, (char *) &category);
                   printf("ERROR: Symbol %s is not a variable or a parameter! Declared as: %s\n", symb_pter->identifier, category);
@@ -425,9 +426,13 @@ atribuicao:
                 if (symb_pter->category == VARIABLE) {
                   push_symbol_stack(&symbol_stack, *symb_pter);
                   push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
-                } else {
+                }
+                if (symb_pter->category == PROCEDURE) {
                   push_symbol_stack(&symbol_stack, *symb_pter);
                   push_type_stack(&var_type_stack, symb_pter->values.parameter.variable_type);
+                } else {
+                  push_symbol_stack(&symbol_stack, *symb_pter);
+                  push_type_stack(&var_type_stack, symb_pter->values.function.variable_type);
                 }
               }
             expr { /* Gera sequencia de operacoes, confere tipos */ }
