@@ -431,7 +431,7 @@ void print_function_symbol(symbol s) {
   }
   char label_string[LABEL_MAX_SIZE];
   label_to_string(s.values.function.label, (char * ) &label_string);
-  printf("| %s | FUNCTION | lexical_level: %d | label: %s | return_type: %s | return_offset: %d | params: %s\n",
+  printf("| %s | FUNCTION | lexical_level: %d | label: %s | var_type: %s | return_offset: %d | params: %s\n",
             s.identifier, s.values.function.lexical_level, label_string,
             return_type_str, s.values.function.offset, params_string);
 }
@@ -493,8 +493,8 @@ void insert_function(symbol_table * table, char * ident_token, int lexical_level
   new_symbol.category = FUNCTION;
   strcpy(new_symbol.identifier, ident_token);
   /* TODO -- check if OK*/
-  new_symbol.values.function.lexical_level = (short) lexical_level;
-  new_symbol.values.function.label =  (short) label_to_integer(label);
+  new_symbol.values.function.lexical_level = (int8_t) lexical_level;
+  new_symbol.values.function.label =  (int8_t) label_to_integer(label);
   new_symbol.values.function.parameter_list = l_init();
   insert_table(table, new_symbol);
 }
@@ -503,6 +503,7 @@ void insert_function(symbol_table * table, char * ident_token, int lexical_level
 int update_function_return_type(symbol_table * table, char * return_type_token) {
   printf("%s\n", return_type_token);
   VariableType var_type = parse_var_type(return_type_token);
+  printf("%d\n", var_type);
   if (var_type == -1) return -1;
   /* find last declared function symbol*/
   int idx = -1;
@@ -521,6 +522,7 @@ int update_function_return_type(symbol_table * table, char * return_type_token) 
   /* update function symbol variable with return type, offset and all that */
   function_symb.values.function.offset = -(l_size(function_symb.values.function.parameter_list) + 4);
   function_symb.values.function.variable_type = var_type;
+  printf("Updated function symbol?\n");
 }
 
 
@@ -541,18 +543,18 @@ int parse_var_type(char * token) {
     pter++;
     ch++;
   }
+  *pter = '\0';
   char * integer = "INTEGER";
   char * boolean = "BOOLEAN";
-  VariableType var_type;
-  if (strcmp(parsed_token, integer) == 0) {
-    var_type = INTEGER;
-  } else if (strcmp(parsed_token, boolean) == 0) {
-    var_type = BOOLEAN;
-  } else {
-    printf("ERROR: Invalid variable type: '%s'. Must be either '%s' or '%s'\n", token, integer, boolean);
-    return -1;
+  int test;
+  if ((test = strcmp(parsed_token, integer)) == 0) {
+    return INTEGER;
   }
-  return var_type;
+  if ((test = strcmp(parsed_token, boolean)) == 0) {
+    return BOOLEAN;
+  }
+  printf("ERROR: Invalid variable type: '%s'. Must be either '%s' or '%s'\n", token, integer, boolean);
+  return -1;
 }
 
 int update_var_type(symbol_table * table, char * token) {
