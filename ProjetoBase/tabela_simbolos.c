@@ -610,15 +610,23 @@ int assemble_read_write_instruction(char * temp_str, const char * instruction, s
                                        symb_pter->values.parameter.lexical_level,
                                        symb_pter->values.parameter.offset);
       break;
+      case FUNCTION:
+        sprintf(temp_str, "%s %hd, %hd", instruction,
+                                       symb_pter->values.function.lexical_level,
+                                       symb_pter->values.function.offset);
+      break;
       default:
-        printf("ERROR: Invalid Category!\n");
+        ;
+        char cat_str[255];
+        category_type_to_string(symb_pter->category, cat_str);
+        printf("ERROR: Invalid Category: %s!\n", cat_str);
         return -1;
     }
     return 0;
 }
 
-int check_symbol_category(symbol * symb_pter, CategoryType cat_type) {
-      if (symb_pter->category != cat_type) {
+int check_symbol_category(symbol * symb_pter, CategoryType cat_type, CategoryType cat_type2) {
+      if (symb_pter->category != cat_type && symb_pter->category != cat_type2) {
         char category[255];
         char expected_category[255];
         category_type_to_string(symb_pter->category, (char *) &category);

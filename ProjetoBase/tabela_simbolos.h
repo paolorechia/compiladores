@@ -107,6 +107,6 @@ int update_var_type(symbol_table * table, char * token);
 int remove_local_vars(symbol_table * table);
 symbol * find_identifier(symbol_table * table, char * identifier);
 int assemble_read_write_instruction(char * temp_str, const char * instruction, symbol * symp_pter);
-int check_symbol_category(symbol * symb_pter, CategoryType cat_type);
+int check_symbol_category(symbol * symb_pter, CategoryType cat_type, CategoryType cat_type2);
 
 #endif /*TABELA_SIMBOLOS_H*/

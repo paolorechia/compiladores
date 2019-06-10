@@ -336,14 +336,23 @@ chamada_sem_parametro: PONTO_E_VIRGULA {
     printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
     return -1;
   } else {
-      if (check_symbol_category(symb_pter, PROCEDURE) == -1) return -1;
-      last_param_list = symb_pter->values.procedure.parameter_list;
-      if (l_size(last_param_list) > 0) {
-        printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
-        return -1;
-      }
+      if (check_symbol_category(symb_pter, PROCEDURE, FUNCTION) == -1) return -1;
       char label[55];
-      label_to_string(symb_pter->values.procedure.label, label);
+      if (symb_pter->category == PROCEDURE) {
+        last_param_list = symb_pter->values.procedure.parameter_list;
+        if (l_size(last_param_list) > 0) {
+          printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+          return -1;
+        }
+        label_to_string(symb_pter->values.procedure.label, label);
+      } else {
+        last_param_list = symb_pter->values.function.parameter_list;
+        if (l_size(last_param_list) > 0) {
+          printf("ERROR: function signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+          return -1;
+        }
+        geraCodigo(NULL, "AMEM 1");
+      }
       sprintf(temp_str, "CHPR %s, %d", label, lexical_level);
       geraCodigo(NULL, temp_str);
   }
@@ -352,8 +361,12 @@ chamada_sem_parametro: PONTO_E_VIRGULA {
 
 chamada_com_parametros: ABRE_PARENTESES {
     symb_pter = find_identifier(table, last_identifier); 
-    if (check_symbol_category(symb_pter, PROCEDURE) == -1) return -1;
-    last_param_list = symb_pter->values.procedure.parameter_list;
+    if (check_symbol_category(symb_pter, PROCEDURE, FUNCTION) == -1) return -1;
+    if (symb_pter->category == PROCEDURE) {
+      last_param_list = symb_pter->values.procedure.parameter_list;
+    } else {
+      last_param_list = symb_pter->values.function.parameter_list;
+    }
     caller_param_list = l_init();
     l_copy(last_param_list, caller_param_list);
   } 
@@ -371,11 +384,17 @@ chamada_com_parametros: ABRE_PARENTESES {
       printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
       return -1;
     } else {
-      if (check_symbol_category(symb_pter, PROCEDURE) == -1) return -1;
+      if (check_symbol_category(symb_pter, PROCEDURE, FUNCTION) == -1) return -1;
         char label[55];
-        label_to_string(symb_pter->values.procedure.label, label);
+        if (symb_pter->category == PROCEDURE) {
+          label_to_string(symb_pter->values.procedure.label, label);
+        } else {
+          label_to_string(symb_pter->values.function.label, label);
+          geraCodigo(NULL, "AMEM 1");
+        }
         sprintf(temp_str, "CHPR %s, %d", label, lexical_level);
         geraCodigo(NULL, temp_str);
+
     }
   }
   PONTO_E_VIRGULA
@@ -423,16 +442,19 @@ atribuicao:
                   printf("ERROR: Symbol %s is not a variable or a parameter! Declared as: %s\n", symb_pter->identifier, category);
                   return -1;
                 }
-                if (symb_pter->category == VARIABLE) {
-                  push_symbol_stack(&symbol_stack, *symb_pter);
-                  push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
-                }
-                if (symb_pter->category == PROCEDURE) {
-                  push_symbol_stack(&symbol_stack, *symb_pter);
-                  push_type_stack(&var_type_stack, symb_pter->values.parameter.variable_type);
-                } else {
-                  push_symbol_stack(&symbol_stack, *symb_pter);
-                  push_type_stack(&var_type_stack, symb_pter->values.function.variable_type);
+                switch (symb_pter->category) {
+                  case VARIABLE:
+                    push_symbol_stack(&symbol_stack, *symb_pter);
+                    push_type_stack(&var_type_stack, symb_pter->values.variable.variable_type);
+                  break;
+                  case PARAMETER:
+                    push_symbol_stack(&symbol_stack, *symb_pter);
+                    push_type_stack(&var_type_stack, symb_pter->values.parameter.variable_type);
+                  break;
+                  case FUNCTION:
+                    push_symbol_stack(&symbol_stack, *symb_pter);
+                    push_type_stack(&var_type_stack, symb_pter->values.function.variable_type);
+                  break;
                 }
               }
             expr { /* Gera sequencia de operacoes, confere tipos */ }
@@ -551,6 +573,10 @@ variavel: IDENT {
       case PARAMETER:
         push_symbol_stack(&symbol_stack, *symb_pter);
         push_type_stack(&var_type_stack, symb_pter->values.parameter.variable_type);
+        break;
+      case FUNCTION:
+        push_symbol_stack(&symbol_stack, *symb_pter);
+        push_type_stack(&var_type_stack, symb_pter->values.function.variable_type);
         break;
       default:
         printf("ERROR: Invalid Category!\n");
