@@ -250,9 +250,9 @@ lista_idents: lista_idents VIRGULA IDENT
 
 comando_sem_rotulo_ou_composto: comando_composto | comando_sem_rotulo
 
-comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END
+comando_composto: T_BEGIN lista_comandos T_END | T_BEGIN T_END
 
-comandos: comandos comando PONTO_E_VIRGULA | comando PONTO_E_VIRGULA
+lista_comandos: comando | comando PONTO_E_VIRGULA | comando PONTO_E_VIRGULA lista_comandos 
 ;
 
 comando: comando_sem_rotulo | 

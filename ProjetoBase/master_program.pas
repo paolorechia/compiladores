@@ -12,11 +12,11 @@ program exemplo12 (input, output);
   begin (* p *)
     100: s:=f(t) ; t:=s;
     if t<x then goto 100;
-    200: x:=x-1
+    200: x:=x-1;
   end; (* p *)
   procedure r;
     procedure q;
       var y : integer;
-      begin read(y); p(y) ; write(y) end; (* q *)
+      begin read(y); p(y); write(y) end; (* q *)
     begin q end; (* r *)
   begin read(x); r end.
