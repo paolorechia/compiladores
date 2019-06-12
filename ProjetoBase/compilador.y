@@ -152,7 +152,6 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                       DOIS_PONTOS IDENT {
                         /* Acrescentar retorno de funcao na tabela simbolos */
                         if (update_function_return_type(table, token) == -1) return -1;
-                        printf("WUUUT!\n");
                       } PONTO_E_VIRGULA 
                       bloco {
                         print_table(table);
@@ -168,7 +167,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                       }
 ;
 
-lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES |
+lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES | ABRE_PARENTESES FECHA_PARENTESES |
 ;
 
 lista_parametros: lista_parametros VIRGULA parametro | parametro
@@ -328,10 +327,10 @@ comando_repetitivo: WHILE {
 atribuicao_ou_chamada_procedimento: IDENT { strcpy(last_identifier, token); } acontinua
 ;
 
-acontinua: atribuicao | chamada_sem_parametro | chamada_com_parametros PONTO_E_VIRGULA
+acontinua: atribuicao | chamada_sem_parametro PONTO_E_VIRGULA | chamada_com_parametros PONTO_E_VIRGULA
 
 
-chamada_sem_parametro: PONTO_E_VIRGULA { 
+chamada_sem_parametro: { 
   symb_pter = find_identifier(table, last_identifier); 
   if (symb_pter == NULL) {
     printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
@@ -534,7 +533,14 @@ elemento: num |
           /* TODO: adicionar chamada de funcao */
           if (symb_pter->category == FUNCTION) {
           /* Todo: tratar caso especial em que função não tem parâmetros */
-
+            last_param_list = symb_pter->values.function.parameter_list;
+            if (l_size(last_param_list) > 0) {
+              printf("ERROR: function signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+              return -1;
+            }
+            geraCodigo(NULL, "AMEM 1");
+            sprintf(temp_str, "CHPR %s, %d", label, lexical_level);
+            geraCodigo(NULL, temp_str);
           } else if (current_param_type == BYREFERENCE) {
             if ((symb_pter->category == PARAMETER && symb_pter->values.parameter.parameter_type == BYVAL) ||
                  symb_pter->category == VARIABLE) {
