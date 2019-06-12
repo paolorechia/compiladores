@@ -541,22 +541,29 @@ elemento: num |
             geraCodigo(NULL, "AMEM 1");
             sprintf(temp_str, "CHPR %s, %d", label, lexical_level);
             geraCodigo(NULL, temp_str);
-          } else if (current_param_type == BYREFERENCE) {
+            break;
+          } 
+          /* Primeiro if marca que está empilhando parâmetro passado por referência */
+          if (current_param_type == BYREFERENCE) {
+            printf("WUT: %s\n", symb_pter->identifier);
             if ((symb_pter->category == PARAMETER && symb_pter->values.parameter.parameter_type == BYVAL) ||
                  symb_pter->category == VARIABLE) {
+              printf("WUT2: %s\n", symb_pter->identifier);
               if (assemble_read_write_instruction(temp_str, "CREN", symb_pter) == -1) return -1;
             } else {
+              printf("WUT3: %s\n", symb_pter->identifier);
               if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
             }
-          } else {
+          } /* Senão, trata referências normais às variáveis/parêmetros */
+          else {
             if (symb_pter->category == PARAMETER && symb_pter->values.parameter.parameter_type == BYREFERENCE) {
               if (assemble_read_write_instruction(temp_str, "CRVI", symb_pter) == -1) return -1;
             }
             else {
               if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
             }
-            geraCodigo(NULL, temp_str);
           }
+          geraCodigo(NULL, temp_str);
         }
 ;
 

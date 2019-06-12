@@ -12,5 +12,4 @@ begin
   read(x);
   p(x, y);
   write(x, y);
-  write(t);
 end.
