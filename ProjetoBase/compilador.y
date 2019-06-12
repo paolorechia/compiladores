@@ -252,10 +252,10 @@ comando_sem_rotulo_ou_composto: comando_composto | comando_sem_rotulo
 
 comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END
 
-comandos: comandos comando | comando
+comandos: comandos comando PONTO_E_VIRGULA | comando PONTO_E_VIRGULA
 ;
 
-comando: comando_sem_rotulo PONTO_E_VIRGULA | 
+comando: comando_sem_rotulo | 
   NUMERO {
     symb_pter = find_identifier(table, token);
     if (check_symbol_category(symb_pter, LABEL_SYMBOL_TYPE, NULL_CAT) == -1) return -1;
@@ -266,7 +266,7 @@ comando: comando_sem_rotulo PONTO_E_VIRGULA |
     geraCodigo(label, temp_str);
     // TODO: verificar se é preciso limpar tabela de simbolos
   }
-  DOIS_PONTOS comando_sem_rotulo PONTO_E_VIRGULA
+  DOIS_PONTOS comando_sem_rotulo 
 ;
 
 comando_sem_rotulo: atribuicao_ou_chamada_procedimento |
@@ -274,7 +274,7 @@ comando_sem_rotulo: atribuicao_ou_chamada_procedimento |
                     comando_condicional |
                     leitura |
                     escrita |
-                    chamada_goto
+                    chamada_goto 
 ;
 
 
@@ -360,7 +360,7 @@ comando_repetitivo: WHILE {
                          }
                     DO
                     comando_sem_rotulo_ou_composto { }
-                    PONTO_E_VIRGULA { 
+                    { 
                       label_pter2 = pop_label_stack(&label_stack);
                       label_pter = pop_label_stack(&label_stack);
                       sprintf(temp_str, "DSVS %s", label_pter);
@@ -373,7 +373,7 @@ comando_repetitivo: WHILE {
 atribuicao_ou_chamada_procedimento: IDENT { strcpy(last_identifier, token); } acontinua
 ;
 
-acontinua: atribuicao | chamada_sem_parametro PONTO_E_VIRGULA | chamada_com_parametros PONTO_E_VIRGULA
+acontinua: atribuicao | chamada_sem_parametro | chamada_com_parametros 
 
 
 chamada_sem_parametro: { 

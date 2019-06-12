@@ -7,7 +7,7 @@ program proc1 (input, output);
       if (x > 1) then
         p(x, t);
       y:= y * z;
-    end
+    end;
 begin
   read(x);
   p(x, y);

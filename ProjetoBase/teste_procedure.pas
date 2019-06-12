@@ -7,13 +7,13 @@ program proc1 (input, output);
       if (x > 1) then
         p;
       y:= y * z;
-    end
+    end;
   procedure q;
     var u: integer;
     begin
       u := 3 * 7;
       write(u);
-    end
+    end;
 begin
   read(x);
   p;

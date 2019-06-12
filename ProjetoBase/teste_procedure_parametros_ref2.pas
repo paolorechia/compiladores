@@ -7,7 +7,7 @@ program proc1 (input, output);
       y:= y * z;
       p(w, k);
       t:= t;
-    end
+    end;
 begin
   read(x);
   p(x, y);

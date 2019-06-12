@@ -8,13 +8,13 @@ program proc1 (input, output);
       begin
         read(u);
         write(u);
-      end
+      end;
     begin
       x:= x - 1;
       if (x > 1) then
         p;
       y:= y * z;
-    end
+    end;
 begin
   read(x);
   p;
