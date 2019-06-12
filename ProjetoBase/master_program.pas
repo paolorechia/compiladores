@@ -1,8 +1,8 @@
 program exemplo12 (input, output);
   var x : integer;
   procedure p (var t : integer);
-    var s : integer;
     label 100, 200;
+    var s : integer;
     function f(z : integer): integer;
     begin (* f *)
       if z<0 then goto 200

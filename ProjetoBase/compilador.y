@@ -80,7 +80,7 @@ programa    :{
 ;
 
 bloco       : 
-              parte_declara_vars declara_rotulos declara_subrotina comando_composto
+              declara_rotulos parte_declara_vars declara_subrotina comando_composto
 ;
 
 
@@ -142,6 +142,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         pop_istack(&offset_stack);
                         print_table(table);
                       }
+                     PONTO_E_VIRGULA
 ;
 
 declara_funcao: FUNCTION_TOKEN IDENT {
@@ -183,6 +184,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         lexical_level--;
                         pop_istack(&offset_stack);
                       }
+                     PONTO_E_VIRGULA
 ;
 
 lp: ABRE_PARENTESES  lista_parametros FECHA_PARENTESES | ABRE_PARENTESES FECHA_PARENTESES |
@@ -246,16 +248,14 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-comando_sem_rotulo_ou_composto: comando_composto_pv | comando_sem_rotulo 
-
-comando_composto_pv: T_BEGIN comandos T_END PONTO_E_VIRGULA | T_BEGIN T_END PONTO_E_VIRGULA
+comando_sem_rotulo_ou_composto: comando_composto | comando_sem_rotulo
 
 comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END
 
 comandos: comandos comando | comando
 ;
 
-comando: comando_sem_rotulo | 
+comando: comando_sem_rotulo PONTO_E_VIRGULA | 
   NUMERO {
     symb_pter = find_identifier(table, token);
     if (check_symbol_category(symb_pter, LABEL_SYMBOL_TYPE, NULL_CAT) == -1) return -1;
@@ -266,7 +266,7 @@ comando: comando_sem_rotulo |
     geraCodigo(label, temp_str);
     // TODO: verificar se é preciso limpar tabela de simbolos
   }
-  DOIS_PONTOS comando_sem_rotulo
+  DOIS_PONTOS comando_sem_rotulo PONTO_E_VIRGULA
 ;
 
 comando_sem_rotulo: atribuicao_ou_chamada_procedimento |
@@ -289,10 +289,10 @@ chamada_goto: GOTO NUMERO {
     geraCodigo(NULL, temp_str);
     // TODO: Verificar se é preciso alterar nivel lexico corrente aqui
     // lexical_level = symb_pter->lexical_level;
-  } PONTO_E_VIRGULA;
+  } ;
 ;
 
-leitura: READ ABRE_PARENTESES lista_leitura FECHA_PARENTESES PONTO_E_VIRGULA
+leitura: READ ABRE_PARENTESES lista_leitura FECHA_PARENTESES 
 ;
 
 lista_leitura: lista_leitura VIRGULA ident_variavel empilha_variavel { 
@@ -308,7 +308,7 @@ lista_leitura: lista_leitura VIRGULA ident_variavel empilha_variavel {
                       geraCodigo(NULL, temp_str);
                     } 
 
-escrita: WRITE ABRE_PARENTESES lista_escrita FECHA_PARENTESES PONTO_E_VIRGULA
+escrita: WRITE ABRE_PARENTESES lista_escrita FECHA_PARENTESES 
 ;
 
 lista_escrita: lista_escrita VIRGULA elemento { geraCodigo(NULL, "IMPR"); }
@@ -359,7 +359,7 @@ comando_repetitivo: WHILE {
                             geraCodigo(NULL, temp_str);
                          }
                     DO
-                    comando_composto { }
+                    comando_sem_rotulo_ou_composto { }
                     PONTO_E_VIRGULA { 
                       label_pter2 = pop_label_stack(&label_stack);
                       label_pter = pop_label_stack(&label_stack);
@@ -503,7 +503,6 @@ atribuicao:
                 }
               }
             expr { /* Gera sequencia de operacoes, confere tipos */ }
-            PONTO_E_VIRGULA 
             {
               /* Desempilha endereco de memoria e gera ARMZ/ARMI */ 
                 if (type_check(&var_type_stack, nl) == -1) return -1;
