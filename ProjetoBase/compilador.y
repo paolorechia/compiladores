@@ -58,6 +58,7 @@ extern char * yytext;
 %token MAIS MENOS ASTERICO BARRA
 %token AND OR TRUE FALSE
 %token READ WRITE
+%token GOTO
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE 
@@ -79,11 +80,24 @@ programa    :{
 ;
 
 bloco       : 
-              parte_declara_vars declara_subrotina comando_composto
+              parte_declara_vars declara_rotulos declara_subrotina comando_composto
 ;
+
+declara_rotulos: lista_rotulos |
+;
+
+lista_rotulos: lista_rotulos VIRGULA declara_rotulo | declara_rotulo PONTO_E_VIRGULA
+; 
+
+declara_rotulo: NUMERO { 
+    // TODO: insere rotulo na tabela de simbolos 
+   }
+;
+
 
 declara_subrotina: lista_subrotinas |
 ;
+
 
 lista_subrotinas: lista_subrotinas declara_procedimento | declara_procedimento | lista_subrotinas declara_funcao | declara_funcao
 ;
@@ -126,7 +140,6 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                       }
 ;
 
-/* TODO: fix this block */
 declara_funcao: FUNCTION_TOKEN IDENT {
                         lexical_level++;
 
@@ -236,14 +249,32 @@ comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END
 comandos: comandos comando | comando
 ;
 
-comando: comando_sem_rotulo | NUMERO DOIS_PONTOS comando_sem_rotulo
+comando: comando_sem_rotulo | 
+  NUMERO {
+    // TODO: encontra rotulo na tabela de simbolos
+    // Puxar numero de variaveis locais da tabela de simbolos
+    // Gera ENRT k, n (nivel lexico atual, numero variaveis locais)
+    // geraCodigo(rotulo, ENRT)...
+    // Possivelmente limpar tabela de simbolos?
+  }
+  DOIS_PONTOS comando_sem_rotulo
 ;
 
 comando_sem_rotulo: atribuicao_ou_chamada_procedimento |
                     comando_repetitivo |
                     comando_condicional |
                     leitura |
-                    escrita
+                    escrita |
+                    chamada_goto
+;
+
+
+chamada_goto: GOTO NUMERO {
+    // TODO: implementar desvio para rotulo 
+    // Encontrar rotulo na tabela de simbolos
+    // DSVR, p, j, k (rotulo alvo, nivel lexico destino, nivel lexico atual)
+    // Alterar nivel lexico corrente aqui
+  }
 ;
 
 leitura: READ ABRE_PARENTESES lista_leitura FECHA_PARENTESES PONTO_E_VIRGULA
@@ -530,9 +561,8 @@ elemento: num |
           ident_variavel empilha_variavel {
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
-          /* TODO: adicionar chamada de funcao */
           if (symb_pter->category == FUNCTION) {
-          /* Todo: tratar caso especial em que função não tem parâmetros */
+          /* Caso especial em que função não tem parâmetros */
             last_param_list = symb_pter->values.function.parameter_list;
             if (l_size(last_param_list) > 0) {
               printf("ERROR: function signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));

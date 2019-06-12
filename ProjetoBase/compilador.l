@@ -214,6 +214,12 @@ write { simbolo = simb_write;
           return WRITE;
  }
 
+goto { simbolo = simb_goto;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" goto ");
+        return GOTO;
+     }
+
 procedure { simbolo = simb_procedure;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" procedure ");
