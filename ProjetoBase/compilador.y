@@ -328,7 +328,7 @@ comando_repetitivo: WHILE {
 atribuicao_ou_chamada_procedimento: IDENT { strcpy(last_identifier, token); } acontinua
 ;
 
-acontinua: atribuicao | chamada_sem_parametro | chamada_com_parametros
+acontinua: atribuicao | chamada_sem_parametro | chamada_com_parametros PONTO_E_VIRGULA
 
 
 chamada_sem_parametro: PONTO_E_VIRGULA { 
@@ -398,7 +398,6 @@ chamada_com_parametros: ABRE_PARENTESES {
 
     }
   }
-  PONTO_E_VIRGULA
 ;
 
 lista_parametros_chamada: lista_parametros_chamada VIRGULA parametro_chamada | parametro_chamada;
