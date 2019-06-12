@@ -14,7 +14,7 @@
 #include "pilhas_auxiliares.h"
 
 
-int num_vars;
+int local_num_vars = 0;
 int param_num = 0;
 int lexical_level = 0;
 int offset = 0;
@@ -58,7 +58,7 @@ extern char * yytext;
 %token MAIS MENOS ASTERICO BARRA
 %token AND OR TRUE FALSE
 %token READ WRITE
-%token GOTO
+%token LABEL GOTO
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE 
@@ -72,8 +72,8 @@ programa    :{
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
              print_table(table);
-             num_vars = remove_local_vars(table);
-             sprintf(temp_str, "DMEM %d", num_vars);
+             local_num_vars = remove_local_vars(table);
+             sprintf(temp_str, "DMEM %d", local_num_vars);
              geraCodigo (NULL, temp_str);
              geraCodigo (NULL, "PARA"); 
              }
@@ -83,14 +83,17 @@ bloco       :
               parte_declara_vars declara_rotulos declara_subrotina comando_composto
 ;
 
-declara_rotulos: lista_rotulos |
+
+declara_rotulos: LABEL lista_rotulos PONTO_E_VIRGULA |
 ;
 
-lista_rotulos: lista_rotulos VIRGULA declara_rotulo | declara_rotulo PONTO_E_VIRGULA
+lista_rotulos: lista_rotulos VIRGULA declara_rotulo | declara_rotulo
 ; 
 
 declara_rotulo: NUMERO { 
     // TODO: insere rotulo na tabela de simbolos 
+    generate_label(&label_counter, (char * )label);
+    insert_label(table, token, lexical_level, label);
    }
 ;
 
@@ -119,6 +122,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         insert_procedure(table, token, lexical_level, label);
                         last_param_list = peek_table(table)->values.procedure.parameter_list;
                         push_istack(&offset_stack, 0);
+                        param_num = 0; 
                       }
                       lp {
                         update_subroutine_parameters(table);
@@ -129,7 +133,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         print_table(table);
                         sprintf(temp_str, "DMEM %d", remove_local_vars(table));
                         geraCodigo(NULL, temp_str);
-                        // implementar pilha ou algo mais elaborado para param_num quando acrescentar parametros
+                        // TODO: verificar se param_num funciona corretamente 
                         sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         label_pter = pop_label_stack(&label_stack); 
@@ -157,6 +161,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         insert_function(table, token, lexical_level, label);
                         last_param_list = peek_table(table)->values.function.parameter_list;
                         push_istack(&offset_stack, 0);
+                        param_num = 0; 
                       }
                       lp {
                         update_subroutine_parameters(table);
@@ -170,7 +175,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         print_table(table);
                         sprintf(temp_str, "DMEM %d", remove_local_vars(table));
                         geraCodigo(NULL, temp_str);
-                        // implementar pilha ou algo mais elaborado para param_num quando acrescentar parametros
+                        // TODO: verificar se param_num funciona corretamente 
                         sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         label_pter = pop_label_stack(&label_stack); 
@@ -180,10 +185,11 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                       }
 ;
 
-lp: ABRE_PARENTESES lista_parametros FECHA_PARENTESES | ABRE_PARENTESES FECHA_PARENTESES |
+lp: ABRE_PARENTESES  lista_parametros FECHA_PARENTESES | ABRE_PARENTESES FECHA_PARENTESES |
 ;
 
-lista_parametros: lista_parametros VIRGULA parametro | parametro
+lista_parametros:  lista_parametros VIRGULA parametro { param_num++;} |
+                  parametro { param_num++; }
 
 parametro: IDENT {  strcpy(last_identifier, token); } DOIS_PONTOS tipo {
             VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
@@ -210,8 +216,8 @@ declara_var : { }
               lista_id_var DOIS_PONTOS 
               tipo 
               { /* AMEM */
-                num_vars = update_var_type(table, token);
-                sprintf(temp_str, "AMEM %d", num_vars);
+                local_num_vars = update_var_type(table, token);
+                sprintf(temp_str, "AMEM %d", local_num_vars);
                 geraCodigo (NULL, temp_str); 
               }
               PONTO_E_VIRGULA
@@ -251,11 +257,14 @@ comandos: comandos comando | comando
 
 comando: comando_sem_rotulo | 
   NUMERO {
-    // TODO: encontra rotulo na tabela de simbolos
-    // Puxar numero de variaveis locais da tabela de simbolos
+    symb_pter = find_identifier(table, token);
+    if (check_symbol_category(symb_pter, LABEL_SYMBOL_TYPE, NULL_CAT) == -1) return -1;
+    // TODO: verificar se o número de variáveis locais está correto
+    sprintf(temp_str, "ENRT %d, %d", lexical_level, local_num_vars);
     // Gera ENRT k, n (nivel lexico atual, numero variaveis locais)
-    // geraCodigo(rotulo, ENRT)...
-    // Possivelmente limpar tabela de simbolos?
+    label_to_string(symb_pter->values.label.label, label);
+    geraCodigo(label, temp_str);
+    // TODO: verificar se é preciso limpar tabela de simbolos
   }
   DOIS_PONTOS comando_sem_rotulo
 ;
@@ -270,11 +279,17 @@ comando_sem_rotulo: atribuicao_ou_chamada_procedimento |
 
 
 chamada_goto: GOTO NUMERO {
-    // TODO: implementar desvio para rotulo 
+    // TODO: testar se funciona corretamente
     // Encontrar rotulo na tabela de simbolos
+    symb_pter = find_identifier(table, token);
+    if (check_symbol_category(symb_pter, LABEL_SYMBOL_TYPE, NULL_CAT) == -1) return -1;
+    label_to_string(symb_pter->values.label.label, label);
     // DSVR, p, j, k (rotulo alvo, nivel lexico destino, nivel lexico atual)
-    // Alterar nivel lexico corrente aqui
-  }
+    sprintf(temp_str, "DSVR %s %d %d", label, symb_pter->values.label.lexical_level, lexical_level);
+    geraCodigo(NULL, temp_str);
+    // TODO: Verificar se é preciso alterar nivel lexico corrente aqui
+    // lexical_level = symb_pter->lexical_level;
+  } PONTO_E_VIRGULA;
 ;
 
 leitura: READ ABRE_PARENTESES lista_leitura FECHA_PARENTESES PONTO_E_VIRGULA
@@ -575,13 +590,10 @@ elemento: num |
           } 
           /* Primeiro if marca que está empilhando parâmetro passado por referência */
           if (current_param_type == BYREFERENCE) {
-            printf("WUT: %s\n", symb_pter->identifier);
             if ((symb_pter->category == PARAMETER && symb_pter->values.parameter.parameter_type == BYVAL) ||
                  symb_pter->category == VARIABLE) {
-              printf("WUT2: %s\n", symb_pter->identifier);
               if (assemble_read_write_instruction(temp_str, "CREN", symb_pter) == -1) return -1;
             } else {
-              printf("WUT3: %s\n", symb_pter->identifier);
               if (assemble_read_write_instruction(temp_str, "CRVL", symb_pter) == -1) return -1;
             }
           } /* Senão, trata referências normais às variáveis/parêmetros */

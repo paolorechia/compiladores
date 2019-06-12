@@ -8,7 +8,7 @@
 #define LABEL_MAX_SIZE 4
 #define LABEL_DIGITS 3
 
-typedef enum CategoryType {VARIABLE, FUNCTION, PROCEDURE, PARAMETER} CategoryType;
+typedef enum CategoryType {VARIABLE, FUNCTION, PROCEDURE, PARAMETER, LABEL_SYMBOL_TYPE, NULL_CAT} CategoryType;
 typedef enum VariableType {INTEGER, BOOLEAN, UNDEFINED} VariableType;
 typedef enum ParameterType {BYVAL, BYREFERENCE, NULL_PARAM} ParameterType;
 
@@ -50,6 +50,10 @@ typedef union level {
     VariableType variable_type;
     thead * parameter_list;
   } function;
+  struct label {
+    int32_t lexical_level;
+    int32_t label;
+  } label;
 } symbol_union;
 
 
@@ -90,6 +94,7 @@ void print_variable_symbol(symbol s);
 void print_parameter_symbol(symbol s);
 void print_procedure_symbol(symbol s);
 void print_function_symbol(symbol s);
+void print_label_symbol(symbol s);
 void label_to_string(int c, char * ds);
 void variable_type_to_string(VariableType var_type, char * output_str);
 void category_type_to_string(CategoryType cat_type, char * output_str);
@@ -102,6 +107,7 @@ int update_subroutine_parameters(symbol_table * table);
 VariableType insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type);
 void insert_function(symbol_table * table, char * ident_token, int lexical_level, char * label);
 int update_function_return_type(symbol_table * table, char * token);
+void insert_label(symbol_table * table, char * ident_token, int lexical_level, char * label);
 int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
 int remove_local_vars(symbol_table * table);

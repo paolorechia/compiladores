@@ -168,6 +168,10 @@ int insert_table(symbol_table * table, symbol new_symbol){
       saved_symbol->values.function.parameter_list = l_init(); 
       l_copy(new_symbol.values.function.parameter_list, saved_symbol->values.function.parameter_list);
       break;
+    case LABEL_SYMBOL_TYPE:
+      saved_symbol->values.label.lexical_level = new_symbol.values.label.lexical_level;
+      saved_symbol->values.label.label = new_symbol.values.label.label;
+      break;
     default:
       printf("Invalid category\n");
   }
@@ -225,6 +229,9 @@ void print_table(symbol_table * table) {
           break;
         case FUNCTION:
           print_function_symbol(table->symbols[i]);
+          break;
+        case LABEL_SYMBOL_TYPE:
+          print_label_symbol(table->symbols[i]);
           break;
       }
   }
@@ -436,6 +443,13 @@ void print_function_symbol(symbol s) {
             return_type_str, s.values.function.offset, params_string);
 }
 
+void print_label_symbol(symbol s) {
+  char label_string[LABEL_MAX_SIZE];
+  label_to_string(s.values.function.label, (char * ) &label_string);
+  printf("| %s | LABEL_SYMBOL_TYPE| lexical_level: %d | label: %s\n",
+            s.identifier, s.values.label.lexical_level, label_string);
+}
+
 
 int insert_variable(symbol_table * table, char * identifier, int lexical_level, int offset) {
   symbol new_symbol;
@@ -492,20 +506,17 @@ void insert_function(symbol_table * table, char * ident_token, int lexical_level
   symbol new_symbol;
   new_symbol.category = FUNCTION;
   strcpy(new_symbol.identifier, ident_token);
-  /* TODO -- check if OK*/
   new_symbol.values.function.lexical_level = (int8_t) lexical_level;
   new_symbol.values.function.label =  (int8_t) label_to_integer(label);
   new_symbol.values.function.parameter_list = l_init();
   insert_table(table, new_symbol);
 }
 
-/* TODO -- fix */
 int update_function_return_type(symbol_table * table, char * return_type_token) {
   VariableType var_type = parse_var_type(return_type_token);
   char var_type_str[255];
   variable_type_to_string(var_type, var_type_str);
   if (var_type == -1) return -1;
-  /* find last declared function symbol*/
   int idx = -1;
   int i = table->idx;
   while (i >= 0 && idx == -1) {
@@ -522,6 +533,15 @@ int update_function_return_type(symbol_table * table, char * return_type_token) 
   /* update function symbol variable with return type, offset and all that */
   function_symb->values.function.offset = -(l_size(function_symb->values.function.parameter_list) + 4);
   function_symb->values.function.variable_type = var_type;
+}
+
+void insert_label(symbol_table * table, char * ident_token, int lexical_level, char * label) {
+  symbol new_symbol;
+  new_symbol.category = LABEL_SYMBOL_TYPE;
+  strcpy(new_symbol.identifier, ident_token);
+  new_symbol.values.label.lexical_level = (int32_t) lexical_level;
+  new_symbol.values.label.label =  (int32_t) label_to_integer(label);
+  insert_table(table, new_symbol);
 }
 
 
@@ -626,6 +646,10 @@ int assemble_read_write_instruction(char * temp_str, const char * instruction, s
 }
 
 int check_symbol_category(symbol * symb_pter, CategoryType cat_type, CategoryType cat_type2) {
+      if (symb_pter == NULL) {
+        printf("ERROR: unexpected NULL pointer!. Aborting...\n");
+        return -1;
+      }
       if (symb_pter->category != cat_type && symb_pter->category != cat_type2) {
         char category[255];
         char expected_category[255];
