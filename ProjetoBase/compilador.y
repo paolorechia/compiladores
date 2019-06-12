@@ -527,7 +527,8 @@ fator: fator ASTERICO elemento
 ;
 
 elemento: num | 
-          boolean | 
+          boolean |
+          ident_variavel { strcpy(last_identifier, last_variable_identifier); } chamada_com_parametros |
           ident_variavel empilha_variavel {
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
