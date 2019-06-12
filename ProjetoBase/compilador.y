@@ -24,6 +24,7 @@ char label[LABEL_MAX_SIZE];
 char * label_pter;
 char * label_pter2;
 char last_identifier[TAM_TOKEN];
+char last_variable_identifier[TAM_TOKEN];
 char last_instruction[TAM_TOKEN];
 char temp_str[TAM_TOKEN];
 
@@ -249,13 +250,13 @@ comando_sem_rotulo: atribuicao_ou_chamada_procedimento |
 leitura: READ ABRE_PARENTESES lista_leitura FECHA_PARENTESES PONTO_E_VIRGULA
 ;
 
-lista_leitura: lista_leitura VIRGULA variavel { 
+lista_leitura: lista_leitura VIRGULA ident_variavel empilha_variavel { 
                     symb_pter = pop_symbol_stack(&symbol_stack);
                     geraCodigo(NULL, "LEIT");
                     if (assemble_read_write_instruction(temp_str, "ARMZ", symb_pter) == -1) return -1;
                     geraCodigo(NULL, temp_str);
                     } 
-                    | variavel {
+                    | ident_variavel empilha_variavel {
                       symb_pter = pop_symbol_stack(&symbol_stack);
                       geraCodigo(NULL, "LEIT");
                     if (assemble_read_write_instruction(temp_str, "ARMZ", symb_pter) == -1) return -1;
@@ -527,7 +528,7 @@ fator: fator ASTERICO elemento
 
 elemento: num | 
           boolean | 
-          variavel {
+          ident_variavel empilha_variavel {
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
           /* TODO: adicionar chamada de funcao */
@@ -553,6 +554,12 @@ elemento: num |
         }
 ;
 
+
+ident_variavel : IDENT {
+  { strcpy(last_variable_identifier, token); }
+}
+;
+
 num: NUMERO { 
               sprintf(temp_str, "CRCT %s", token); 
               push_type_stack(&var_type_stack, INTEGER);
@@ -562,9 +569,9 @@ num: NUMERO {
 ;
 
 
-variavel: IDENT { 
+empilha_variavel: { 
   /*Procura variavel na tabela de simbolos e empilha endereco? */ 
-    symb_pter = find_identifier(table, token); 
+    symb_pter = find_identifier(table, last_variable_identifier); 
     if (symb_pter == NULL) {
         printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
         return -1;

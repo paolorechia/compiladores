@@ -631,7 +631,7 @@ int check_symbol_category(symbol * symb_pter, CategoryType cat_type, CategoryTyp
         char expected_category[255];
         category_type_to_string(symb_pter->category, (char *) &category);
         category_type_to_string(cat_type, (char *) &expected_category);
-        printf("ERROR: Symbol %s is not a %s! Declared as: %s\n", symb_pter->identifier, category, expected_category);
+        printf("ERROR: Symbol %s is not a %s! Declared as: %s\n", symb_pter->identifier, expected_category, category);
         return -1;
       }
       return 0;

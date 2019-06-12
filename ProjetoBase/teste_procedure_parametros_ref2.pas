@@ -5,7 +5,7 @@ program proc1 (input, output);
     begin
       x:= x - 1;
       y:= y * z;
-      p(w, w);
+      p(w, k);
       t:= t;
     end
 begin
