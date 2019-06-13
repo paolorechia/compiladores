@@ -519,10 +519,11 @@ atribuicao:
               ;
 
 
-expr: expressao_simples | expr relacao expressao_simples |  {
+expr: expressao_simples | expr relacao expressao_simples {
                           /* Gerar instrucao de comparacao aqui! */
                           geraCodigo(NULL, last_instruction);
                            }
+                        |
 ;
 
 

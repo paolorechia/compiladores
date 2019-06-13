@@ -1,22 +1,16 @@
 program proc1 (input, output);
   var x, y: integer;
-  var m: boolean;
-  procedure p;
+  procedure p(var t: integer, b: integer);
     var z, w, k: integer;
-    procedure q;
-      var u: integer;
-      begin
-        read(u);
-        write(u);
-      end;
     begin
       x:= x - 1;
-      if (x > 1) then
-        p;
       y:= y * z;
+      p(w, k);
+      t:= t;
     end;
 begin
   read(x);
-  p;
+  p(x, y);
   write(x, y);
+  write(t);
 end.

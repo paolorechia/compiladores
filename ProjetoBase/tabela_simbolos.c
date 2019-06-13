@@ -445,7 +445,7 @@ void print_function_symbol(symbol s) {
 
 void print_label_symbol(symbol s) {
   char label_string[LABEL_MAX_SIZE];
-  label_to_string(s.values.function.label, (char * ) &label_string);
+  label_to_string(s.values.label.label, (char * ) &label_string);
   printf("| %s | LABEL_SYMBOL_TYPE| lexical_level: %d | label: %s\n",
             s.identifier, s.values.label.lexical_level, label_string);
 }
