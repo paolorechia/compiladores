@@ -7,7 +7,7 @@ program proc1 (input, output);
       write(t, b);
       x:= x - 1;
       t:= x + z;
-    end
+    end;
 begin
   x:= 3;
   y:= 5;

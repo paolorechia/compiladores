@@ -110,7 +110,6 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
 
                         generate_label(&label_counter, (char * )label);
                         push_label_stack(&label_stack, label);
-                        printf("AQUI: %s\n", label_pter);
                         sprintf(temp_str, "DSVS %s", label);
                         geraCodigo(NULL, temp_str);
 
@@ -339,7 +338,7 @@ if_then: IF expr {
          } 
          THEN comando_sem_rotulo_ou_composto {
             label_pter = peek_label_stack(&label_stack); 
-            print_label_stack(&label_stack);
+//            print_label_stack(&label_stack);
             sprintf(temp_str, "DSVS %s", label_pter);
             geraCodigo(NULL, temp_str);
          }
