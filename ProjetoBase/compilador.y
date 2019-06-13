@@ -71,8 +71,8 @@ programa    :{
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
-             print_table(table);
-             local_num_vars = remove_local_vars(table);
+//             print_table(table);
+//             local_num_vars = remove_local_vars(table);
              sprintf(temp_str, "DMEM %d", local_num_vars);
              geraCodigo (NULL, temp_str);
              geraCodigo (NULL, "PARA"); 
@@ -110,6 +110,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
 
                         generate_label(&label_counter, (char * )label);
                         push_label_stack(&label_stack, label);
+                        printf("AQUI: %s\n", label_pter);
                         sprintf(temp_str, "DSVS %s", label);
                         geraCodigo(NULL, temp_str);
 
@@ -126,11 +127,11 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                       }
                       lp {
                         update_subroutine_parameters(table);
-                        print_table(table);
+//                        print_table(table);
                       }
                       PONTO_E_VIRGULA 
                       bloco {
-                        print_table(table);
+//                        print_table(table);
                         sprintf(temp_str, "DMEM %d", remove_local_vars(table));
                         geraCodigo(NULL, temp_str);
                         // TODO: verificar se param_num funciona corretamente 
@@ -140,7 +141,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         geraCodigo(label_pter, "NADA");
                         lexical_level--;
                         pop_istack(&offset_stack);
-                        print_table(table);
+//                        print_table(table);
                       }
                      PONTO_E_VIRGULA
 ;
@@ -166,14 +167,14 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                       }
                       lp {
                         update_subroutine_parameters(table);
-                        print_table(table);
+//                        print_table(table);
                       }
                       DOIS_PONTOS IDENT {
                         /* Acrescentar retorno de funcao na tabela simbolos */
                         if (update_function_return_type(table, token) == -1) return -1;
                       } PONTO_E_VIRGULA 
                       bloco {
-                        print_table(table);
+//                        print_table(table);
                         sprintf(temp_str, "DMEM %d", remove_local_vars(table));
                         geraCodigo(NULL, temp_str);
                         // TODO: verificar se param_num funciona corretamente 
@@ -206,7 +207,9 @@ parte_declara_vars:  var
 ;
 
 
-var         : { } VAR declara_vars { print_table(table); } 
+var         : { } VAR declara_vars { 
+                    //print_table(table); 
+                    } 
             |
 ;
 
@@ -336,6 +339,7 @@ if_then: IF expr {
          } 
          THEN comando_sem_rotulo_ou_composto {
             label_pter = peek_label_stack(&label_stack); 
+            print_label_stack(&label_stack);
             sprintf(temp_str, "DSVS %s", label_pter);
             geraCodigo(NULL, temp_str);
          }

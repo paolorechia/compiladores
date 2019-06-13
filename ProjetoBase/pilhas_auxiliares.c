@@ -102,7 +102,11 @@ char * peek_label_stack(tlabel_stack * label_stack) {
 }
 
 void print_label_stack(tlabel_stack * label_stack) {
-  printf("NOT IMPLEMENTED\n");
+  int idx = label_stack->idx;
+  while (idx >= 0) {
+    printf("%s\n", label_stack->A[idx]);
+    idx--;
+  }
 }
 
 int increment_label_counter(int count) {

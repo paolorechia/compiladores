@@ -14,6 +14,10 @@ program proc1 (input, output);
         p;
       y:= y * z;
     end;
+  procedure t;
+  begin
+    write(3)
+  end;
 begin
   read(x);
   p;
