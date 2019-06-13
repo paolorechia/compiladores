@@ -53,14 +53,59 @@ void init_symbol_stack(tsymbol_stack * symbol_stack) {
   symbol_stack->idx = 0;
 }
 
+void reset_symbol_stack_queue_idx(tsymbol_stack * symbol_stack) {
+  symbol_stack->queue_start_idx = 1;
+}
+
 int push_symbol_stack(tsymbol_stack * symbol_stack, symbol symbol) {
   symbol_stack->idx++;
   if (symbol_stack->idx > MAX_STACK_SIZE) {
-    printf("Type stack is full, too bad! Something probably went wrong...\n");
+    printf("Symbol stack is full, too bad! Something probably went wrong...\n");
     return -1;
   }
   symbol_stack->A[symbol_stack->idx] = symbol; 
   return 0;
+}
+
+int queue_symbol_stack(tsymbol_stack * symbol_stack, symbol symbol) {
+  symbol_stack->idx++;
+  if (symbol_stack->idx > MAX_STACK_SIZE) {
+    printf("Symbol stack is full, too bad! Something probably went wrong...\n");
+    return -1;
+  }
+  int idx = symbol_stack->idx;
+  int prev_i = idx - 1;
+  while (prev_i > 0) {
+    symbol_stack->A[idx] = symbol_stack->A[prev_i];
+    idx--;
+    prev_i--; 
+  } 
+  symbol_stack->A[1] = symbol; 
+  return 0;
+}
+
+symbol unqueue_symbol_stack(tsymbol_stack * symbol_stack) {
+  symbol symbol_to_return;
+  symbol_to_return.values.parameter.lexical_level = -1;
+  if (symbol_stack->queue_start_idx > symbol_stack->idx) {
+    return symbol_to_return;
+  } 
+  symbol * first_symbol = &(symbol_stack->A[symbol_stack->queue_start_idx]);
+  symbol_stack->queue_start_idx++;
+  strcpy(symbol_to_return.identifier, first_symbol->identifier);
+  symbol_to_return.category = first_symbol->category;
+  symbol_to_return.values.parameter.variable_type = first_symbol->values.parameter.variable_type;
+  symbol_to_return.values.parameter.parameter_type = first_symbol->values.parameter.parameter_type;
+  
+  int prev_i = 1;
+  int idx = prev_i + 1;
+  while (idx <= symbol_stack->idx) {
+    symbol_stack->A[prev_i] = symbol_stack->A[idx];
+    idx++;
+    prev_i++; 
+  } 
+  symbol_stack->idx--;
+  return symbol_to_return;
 }
 
 symbol * pop_symbol_stack(tsymbol_stack * symbol_stack) {
@@ -167,4 +212,3 @@ void print_istack(tint_stack * istack) {
   printf("NOT IMPLEMENTED\n");
 }
 
-/* Parameter stack ... maybe desnecessary!*/

@@ -13,7 +13,6 @@
 #include "tabela_simbolos.h"
 #include "pilhas_auxiliares.h"
 
-
 int local_num_vars = 0;
 int param_num = 0;
 int lexical_level = 0;
@@ -82,7 +81,7 @@ programa    :{
 ;
 
 bloco       : 
-              declara_rotulos parte_declara_vars declara_subrotina comando_composto
+              declara_rotulos parte_declara_vars declara_subrotina T_BEGIN comando_composto
 ;
 
 
