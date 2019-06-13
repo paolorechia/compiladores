@@ -18,11 +18,13 @@ int param_num = 0;
 int lexical_level = 0;
 int offset = 0;
 int label_counter = 0;
+int declarando_procedimento = 0;
 
 char label[LABEL_MAX_SIZE];
 char * label_pter;
 char * label_pter2;
 char last_identifier[TAM_TOKEN];
+char procedure_identifier[TAM_TOKEN];
 char last_variable_identifier[TAM_TOKEN];
 char last_instruction[TAM_TOKEN];
 char temp_str[TAM_TOKEN];
@@ -113,36 +115,22 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                           Empilhar parâmetros
                           Empilhar tipo de parâmetros (pode ser na mesma pilha)
                         */
-                        lexical_level++;
-
-                        generate_label(&label_counter, (char * )label);
-                        push_label_stack(&label_stack, label);
-                        sprintf(temp_str, "DSVS %s", label);
-                        geraCodigo(NULL, temp_str);
-
-                        generate_label(&label_counter, (char * )label);
-                        push_label_stack(&label_stack, label);
-                        sprintf(temp_str, "ENPR %d", lexical_level);
-                        label_pter = pop_label_stack(&label_stack);
-                        geraCodigo(label_pter, temp_str);
-
-                        insert_procedure(table, token, lexical_level, label);
-                        last_param_list = peek_table(table)->values.procedure.parameter_list;
-                        push_istack(&offset_stack, 0);
-                        param_num = 0; 
+                        int declarando_procedimento = 1;
+                        strcpy(procedure_identifier, token);
                       }
                       lp {
                       /* 
-                        Todo:
-                        Modificar para alterar a pilha temporária e não a tabela de símbolos
+                        TODO:
                       */
-                        update_subroutine_parameters(table);
+                        update_queue_parameters(param_stack);
+//                        update_subroutine_parameters(table);
 //                        print_table(table);
                       }
                       PONTO_E_VIRGULA 
                       /* TODO: Dividir a gramática aqui, verificar se tem um BEGIN ou um forward
                       */
                       bloco {
+                      // TODO: fix this part
 //                        print_table(table);
                         sprintf(temp_str, "DMEM %d", remove_local_vars(table));
                         geraCodigo(NULL, temp_str);
@@ -261,9 +249,30 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-comando_sem_rotulo_ou_composto: comando_composto | comando_sem_rotulo
+comando_sem_rotulo_ou_composto: continua_comando_composto_ou_forward | comando_sem_rotulo
 
-continua_comando_composto_ou_forward: T_BEGIN comando_composto | FORWARD PONTO_E_VIRGULA {
+continua_comando_composto_ou_forward: T_BEGIN comando_composto {
+  if (declarando_procedimento) {
+      find_identifier(table, 
+      lexical_level++;
+
+      generate_label(&label_counter, (char * )label);
+      push_label_stack(&label_stack, label);
+      sprintf(temp_str, "DSVS %s", label);
+      geraCodigo(NULL, temp_str);
+
+      generate_label(&label_counter, (char * )label);
+      push_label_stack(&label_stack, label);
+      sprintf(temp_str, "ENPR %d", lexical_level);
+      label_pter = pop_label_stack(&label_stack);
+      geraCodigo(label_pter, temp_str);
+
+      insert_procedure(table, token, lexical_level, label);
+      last_param_list = peek_table(table)->values.procedure.parameter_list;
+      push_istack(&offset_stack, 0);
+      param_num = 0; 
+
+  } | FORWARD PONTO_E_VIRGULA {
   /* 
     TODO: integrar esta regra na gramática
   */
@@ -708,6 +717,8 @@ main (int argc, char** argv) {
    init_type_stack(&var_type_stack);
    init_istack(&offset_stack);
    init_symbol_stack(&symbol_stack);
+   init_symbol_stack(&param_stack);
+   reset_symbol_stack_queue_idx(&param_stack);
  
 
    yyin=fp;

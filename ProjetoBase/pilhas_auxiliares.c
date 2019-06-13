@@ -84,6 +84,16 @@ int queue_symbol_stack(tsymbol_stack * symbol_stack, symbol symbol) {
   return 0;
 }
 
+int update_queue_parameters(tsymbol_stack * symbol_stack, VariableType, var_type) {
+  int updated = 0;
+  int idx = symbol_stack->queue_start_idx;
+  while (idx <= symbol_stack->idx) {
+    symbol_stack->A[idx]->values.parameter.variable_type = var_type;
+    updated++;
+  }
+  return updated;
+}
+
 symbol unqueue_symbol_stack(tsymbol_stack * symbol_stack) {
   symbol symbol_to_return;
   symbol_to_return.values.parameter.lexical_level = -1;
