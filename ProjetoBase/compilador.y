@@ -59,6 +59,7 @@ extern char * yytext;
 %token AND OR TRUE FALSE
 %token READ WRITE
 %token LABEL GOTO
+%token FORWARD
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE 

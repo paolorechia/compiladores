@@ -226,6 +226,12 @@ goto { simbolo = simb_goto;
         return GOTO;
      }
 
+forward { simbolo = simb_forward;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" forward ");
+        return FORWARD;
+     }
+
 procedure { simbolo = simb_procedure;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" procedure ");

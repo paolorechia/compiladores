@@ -18,6 +18,19 @@ VariableType pop_type_stack(tvar_type_stack * type_stack);
 VariableType peek_type_stack(tvar_type_stack * type_stack);
 void print_type_stack(tvar_type_stack * type_stack);
 
+/* ParamType Stack */
+typedef struct tparam_type_stack {
+  ParameterType A[MAX_STACK_SIZE];
+  char identifier[TAM_TOKEN][MAX_STACK_SIZE];
+  int idx;
+} tparam_type_stack;
+
+void init_param_type_stack(tparam_type_stack param_type_stack);
+ParameterType push_param_type_stack(tparam_type_stack param_type_stack, ParameterType param_type);
+ParameterType pop_param_type_stack(tparam_type_stack param_type_stack);
+ParameterType peek_param_type_stack(tparam_type_stack param_type_stack);
+void print_param_type_stack(tparam_type_stack param_type_stack);
+
 /* Symbol Stack */
 typedef struct symbol_stack {
   symbol A[MAX_STACK_SIZE];
