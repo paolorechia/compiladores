@@ -2,6 +2,7 @@
 #include "stdio.h"
 
 
+/* Var type stack */
 void init_type_stack(tvar_type_stack * type_stack) {
   type_stack->idx = 0;
 }
@@ -47,6 +48,7 @@ void print_type_stack(tvar_type_stack * type_stack) {
   }
 }
 
+/* Symbol stack */
 void init_symbol_stack(tsymbol_stack * symbol_stack) {
   symbol_stack->idx = 0;
 }
@@ -75,6 +77,7 @@ void print_symbol_stack(tsymbol_stack * symbol_stack) {
   printf("NOT IMPLEMENTED!\n");
 }
 
+/* Label stack */
 void init_label_stack(tlabel_stack * label_stack) {
   label_stack->idx = 0;
 }
@@ -131,6 +134,7 @@ void generate_label(int  * counter, char * dest_str) {
   *counter = increment_label_counter(*counter);
 }
 
+/* Integer stack */
 void init_istack(tint_stack * istack) {
   istack->idx = 0;
   istack->A[istack->idx] = 0;
@@ -162,3 +166,5 @@ int update_top_istack(tint_stack * istack, int new_val) {
 void print_istack(tint_stack * istack) {
   printf("NOT IMPLEMENTED\n");
 }
+
+/* Parameter stack ... maybe desnecessary!*/

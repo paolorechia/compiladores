@@ -38,6 +38,7 @@ symbol * symb_pter;
 symbol_table * table;
 tvar_type_stack var_type_stack;
 tsymbol_stack symbol_stack;
+tsymbol_stack param_stack;
 tlabel_stack label_stack;
 tint_stack offset_stack;
 
@@ -92,13 +93,13 @@ lista_rotulos: lista_rotulos VIRGULA declara_rotulo | declara_rotulo
 ; 
 
 declara_rotulo: NUMERO { 
-    // TODO: insere rotulo na tabela de simbolos 
     generate_label(&label_counter, (char * )label);
     insert_label(table, token, lexical_level, label);
    }
 ;
 
 
+/* TODO maybe mudar aqui lista de subrotinas: */
 declara_subrotina: lista_subrotinas |
 ;
 
@@ -107,6 +108,12 @@ lista_subrotinas: lista_subrotinas declara_procedimento | declara_procedimento |
 ;
 
 declara_procedimento: PROCEDURE_TOKEN IDENT {
+                        /* 
+                        TODO: modificar este bloco:
+                          Empilhar identificador
+                          Empilhar parâmetros
+                          Empilhar tipo de parâmetros (pode ser na mesma pilha)
+                        */
                         lexical_level++;
 
                         generate_label(&label_counter, (char * )label);
@@ -126,15 +133,20 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         param_num = 0; 
                       }
                       lp {
+                      /* 
+                        Todo:
+                        Modificar para alterar a pilha temporária e não a tabela de símbolos
+                      */
                         update_subroutine_parameters(table);
 //                        print_table(table);
                       }
                       PONTO_E_VIRGULA 
+                      /* TODO: Dividir a gramática aqui, verificar se tem um BEGIN ou um forward
+                      */
                       bloco {
 //                        print_table(table);
                         sprintf(temp_str, "DMEM %d", remove_local_vars(table));
                         geraCodigo(NULL, temp_str);
-                        // TODO: verificar se param_num funciona corretamente 
                         sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         label_pter = pop_label_stack(&label_stack); 
@@ -177,7 +189,6 @@ declara_funcao: FUNCTION_TOKEN IDENT {
 //                        print_table(table);
                         sprintf(temp_str, "DMEM %d", remove_local_vars(table));
                         geraCodigo(NULL, temp_str);
-                        // TODO: verificar se param_num funciona corretamente 
                         sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         label_pter = pop_label_stack(&label_stack); 
@@ -253,7 +264,14 @@ lista_idents: lista_idents VIRGULA IDENT
 
 comando_sem_rotulo_ou_composto: comando_composto | comando_sem_rotulo
 
-comando_composto: T_BEGIN lista_comandos T_END | T_BEGIN T_END
+continua_comando_composto_ou_forward: T_BEGIN comando_composto | FORWARD PONTO_E_VIRGULA {
+  /* 
+    TODO: integrar esta regra na gramática
+  */
+  // TODO: Finalizar ação de FORWARD
+}; 
+
+comando_composto: lista_comandos T_END | T_BEGIN T_END
 
 lista_comandos: comando | comando PONTO_E_VIRGULA | comando PONTO_E_VIRGULA lista_comandos 
 ;
@@ -282,7 +300,6 @@ comando_sem_rotulo: atribuicao_ou_chamada_procedimento |
 
 
 chamada_goto: GOTO NUMERO {
-    // TODO: testar se funciona corretamente
     // Encontrar rotulo na tabela de simbolos
     symb_pter = find_identifier(table, token);
     if (check_symbol_category(symb_pter, LABEL_SYMBOL_TYPE, NULL_CAT) == -1) return -1;
