@@ -323,7 +323,7 @@ comando_condicional: if_then {
               }
 ;
 
-if_then: IF expr {
+if_then: IF expr_condicional {
             generate_label(&label_counter, (char * )label);
             push_label_stack(&label_stack, label);
             generate_label(&label_counter, (char * )label);
@@ -355,7 +355,7 @@ comando_repetitivo: WHILE {
                             generate_label(&label_counter, (char * )label);
                             push_label_stack(&label_stack, label);
                           }
-                    expr {
+                    expr_condicional {
                             label_pter = pop_label_stack(&label_stack);
                             sprintf(temp_str, "DSVF %s", label_pter);
                             geraCodigo(NULL, temp_str);
@@ -523,6 +523,9 @@ atribuicao:
             }
               ;
 
+
+expr_condicional: expr relacao expressao_simples {  geraCodigo(NULL, last_instruction); }
+;
 
 expr: expressao_simples | expr relacao expressao_simples {
                           /* Gerar instrucao de comparacao aqui! */
