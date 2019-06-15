@@ -302,7 +302,6 @@ void print_parameter_symbol(symbol s) {
 
 void label_to_string(int counter, char * dest_str) {
   char buffer[LABEL_MAX_SIZE];
-  printf("%d\n", counter);
   if ( counter < 10 ) {
     sprintf(buffer, "R0%d", counter);
   }  else {
@@ -566,8 +565,11 @@ int remove_nested_subroutines(symbol_table * table, int current_lexical_level) {
   current_symbol = &(table->symbols[idx]);
   int removed_subroutines = 0;
   while (idx >= 0 &&
-          (current_symbol->category == PROCEDURE || current_symbol->category == FUNCTION) &&
-          current_symbol->lexical_level > current_lexical_level) {
+            (current_symbol->category == PROCEDURE ||
+             current_symbol->category == LABEL_SYMBOL_TYPE ||
+             current_symbol->category == PARAMETER ||
+             current_symbol->category == FUNCTION) &&
+         current_symbol->lexical_level > current_lexical_level) {
     removed_subroutines++; 
     idx--;
     current_symbol = &(table->symbols[idx]);

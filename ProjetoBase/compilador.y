@@ -90,6 +90,8 @@ bloco       :
                 geraCodigo(label_pter, "NADA");
                 free(label_pter);
               } comando_composto {
+                printf("Leaving block... before cleaning up...\n");
+                printf("Lexical level: %d\n", lexical_level);
                 print_table(table);
                 remove_nested_subroutines(table, lexical_level);
                 removed_local_vars = remove_local_vars(table);
@@ -97,8 +99,9 @@ bloco       :
                   sprintf(temp_str, "DMEM %d", removed_local_vars);
                   geraCodigo (NULL, temp_str);
                 };
-                print_table(table);
                 remove_parameters(table);
+                printf("Leaving block... after cleaning up...\n");
+                print_table(table);
               }
 ;
 
