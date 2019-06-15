@@ -92,6 +92,7 @@ bloco       :
                 local_num_vars = remove_local_vars(table);
                 sprintf(temp_str, "DMEM %d", local_num_vars);
                 geraCodigo (NULL, temp_str);
+                remove_parameters(table);
               }
 ;
 
@@ -127,6 +128,7 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         param_num = 0; 
                       }
                       lp {
+                        copy_parameters_to_table(table);
                         update_subroutine_parameters(table);
 //                        print_table(table);
                       }
@@ -157,6 +159,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         param_num = 0; 
                       }
                       lp {
+                        copy_parameters_to_table(table);
                         update_subroutine_parameters(table);
 //                        print_table(table);
                       }
