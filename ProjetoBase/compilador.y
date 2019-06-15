@@ -84,6 +84,7 @@ bloco       :
                 push_label_stack(&label_stack, label);
               } declara_subrotina { 
                 label_pter = pop_label_stack(&label_stack); 
+                print_label_stack(&label_stack);
                 geraCodigo(label_pter, "NADA");
                 free(label_pter);
               } comando_composto {
@@ -134,11 +135,8 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         // TODO: verificar se param_num funciona corretamente 
                         sprintf(temp_str, "RTPR %d, %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
-                        label_pter = pop_label_stack(&label_stack); 
-                        geraCodigo(label_pter, "NADA");
                         lexical_level--;
                         pop_istack(&offset_stack);
-                        free(label_pter);
 //                        print_table(table);
                       }
                      PONTO_E_VIRGULA
@@ -171,7 +169,6 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         label_pter = pop_label_stack(&label_stack); 
-                        geraCodigo(label_pter, "NADA");
                         lexical_level--;
                         pop_istack(&offset_stack);
                         free(label_pter);
@@ -329,8 +326,8 @@ if_then: IF expr {
             geraCodigo(NULL, temp_str);
          } 
          THEN comando_sem_rotulo_ou_composto {
-            label_pter = pop_label_stack(&label_stack);  // 4
-            label_pter2 = pop_label_stack(&label_stack); // 3
+            label_pter = pop_label_stack(&label_stack);
+            label_pter2 = pop_label_stack(&label_stack);
             sprintf(temp_str, "DSVS %s", label_pter2);
             geraCodigo(NULL, temp_str);
             push_label_stack(&label_stack, label_pter2);
@@ -353,19 +350,22 @@ comando_repetitivo: WHILE {
                             push_label_stack(&label_stack, label);
                           }
                     expr {
-                            label_pter = peek_label_stack(&label_stack); 
-                            sprintf(temp_str, "DSVF %s", label_pter);
+                            label_pter = pop_label_stack(&label_stack);
+                            label_pter2 = pop_label_stack(&label_stack);
+                            sprintf(temp_str, "DSVF %s", label_pter2);
                             geraCodigo(NULL, temp_str);
+                            push_label_stack(&label_stack, label_pter2);
+                            push_label_stack(&label_stack, label_pter);
+                            free(label_pter);
+                            free(label_pter2);
                          }
                     DO
                     comando_sem_rotulo_ou_composto { }
                     { 
-                      label_pter2 = pop_label_stack(&label_stack);
                       label_pter = pop_label_stack(&label_stack);
                       sprintf(temp_str, "DSVS %s", label_pter);
                       geraCodigo(NULL, temp_str);
-                      geraCodigo(label_pter2, "NADA");
-                      free(label_pter2);
+                      geraCodigo(label_pter, "NADA");
                       free(label_pter);
                     }
 ;
