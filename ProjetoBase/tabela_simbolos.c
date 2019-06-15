@@ -302,10 +302,10 @@ void print_parameter_symbol(symbol s) {
 
 void label_to_string(int counter, char * dest_str) {
   char buffer[LABEL_MAX_SIZE];
-  if ( counter < 100) {
+  printf("%d\n", counter);
+  if ( counter < 10 ) {
     sprintf(buffer, "R0%d", counter);
-  }
-  else {
+  }  else {
     sprintf(buffer, "R%d", counter);
   }
   strncpy(dest_str, buffer, LABEL_MAX_SIZE);

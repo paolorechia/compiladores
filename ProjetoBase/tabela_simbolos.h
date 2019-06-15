@@ -6,7 +6,7 @@
 
 #define MAX_TABLE_SIZE 1024
 #define LABEL_MAX_SIZE 4
-#define LABEL_DIGITS 3
+#define LABEL_DIGITS 2
 
 typedef enum CategoryType {VARIABLE, FUNCTION, PROCEDURE, PARAMETER, LABEL_SYMBOL_TYPE, NULL_CAT} CategoryType;
 typedef enum VariableType {INTEGER, BOOLEAN, UNDEFINED} VariableType;

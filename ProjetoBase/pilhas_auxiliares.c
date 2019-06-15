@@ -1,4 +1,5 @@
 #include "pilhas_auxiliares.h"
+#include "tabela_simbolos.h"
 #include "stdio.h"
 #include "stdlib.h"
 
@@ -119,19 +120,7 @@ int increment_label_counter(int count) {
 
 // Must pass a pointer to a buffer with minimum size (defined elsewhere)
 void generate_label(int  * counter, char * dest_str) {
-  char buffer[LABEL_MAX_SIZE];
-  /*
-  if (*counter < 10) {
-    sprintf(buffer, "R00%d", *counter);
-  } else 
-  */
-  if ( *counter < 100) {
-    sprintf(buffer, "R0%d", *counter);
-  }
-  else {
-    sprintf(buffer, "R%d", *counter);
-  }
-  strncpy(dest_str, buffer, LABEL_MAX_SIZE);
+  label_to_string(*counter, dest_str);
   *counter = increment_label_counter(*counter);
 }
 

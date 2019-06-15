@@ -284,7 +284,7 @@ chamada_goto: GOTO NUMERO {
     if (check_symbol_category(symb_pter, LABEL_SYMBOL_TYPE, NULL_CAT) == -1) return -1;
     label_to_string(symb_pter->values.label.label, label);
     // DSVR, p, j, k (rotulo alvo, nivel lexico destino, nivel lexico atual)
-    sprintf(temp_str, "DSVR %s %d %d", label, symb_pter->lexical_level, lexical_level);
+    sprintf(temp_str, "DSVR %s, %d, %d", label, symb_pter->lexical_level, lexical_level);
     geraCodigo(NULL, temp_str);
     // TODO: Verificar se é preciso alterar nivel lexico corrente aqui
     // lexical_level = symb_pter->lexical_level;
