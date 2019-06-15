@@ -15,7 +15,8 @@
 
 
 int declaring_subroutine = 0;
-int local_num_vars = 0;
+int malloced_local_vars = 0;
+int removed_local_vars = 0;
 int param_num = 0;
 int lexical_level = 0;
 int offset = 0;
@@ -91,8 +92,8 @@ bloco       :
                 print_table(table);
               } comando_composto {
                 remove_nested_procedures(table, lexical_level);
-                local_num_vars = remove_local_vars(table);
-                sprintf(temp_str, "DMEM %d", local_num_vars);
+                removed_local_vars = remove_local_vars(table);
+                sprintf(temp_str, "DMEM %d", removed_local_vars);
                 geraCodigo (NULL, temp_str);
                 remove_parameters(table);
               }
@@ -150,14 +151,11 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
 declara_funcao: FUNCTION_TOKEN IDENT {
                         lexical_level++;
                         generate_label(&label_counter, (char * )label);
-                        push_label_stack(&label_stack, label);
                         sprintf(temp_str, "ENPR %d", lexical_level);
-                        label_pter = pop_label_stack(&label_stack);
-                        geraCodigo(label_pter, temp_str);
+                        geraCodigo(label, temp_str);
                         insert_function(table, token, lexical_level, label);
                         last_param_list = peek_table(table)->values.function.parameter_list;
                         push_istack(&offset_stack, 0);
-                        free(label_pter);
                         param_num = 0; 
                       }
                       lp {
@@ -172,12 +170,10 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                       bloco {
 //                        print_table(table);
                         // TODO: verificar se param_num funciona corretamente 
-                        sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
+                        sprintf(temp_str, "RTPR %d, %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
-                        label_pter = pop_label_stack(&label_stack); 
                         lexical_level--;
                         pop_istack(&offset_stack);
-                        free(label_pter);
                       }
                      PONTO_E_VIRGULA
 ;
@@ -185,8 +181,10 @@ declara_funcao: FUNCTION_TOKEN IDENT {
 lp: ABRE_PARENTESES  lista_parametros FECHA_PARENTESES | ABRE_PARENTESES FECHA_PARENTESES |
 ;
 
-lista_parametros:  lista_parametros VIRGULA parametro { param_num++;} |
+lista_parametros:  lista_parametros pv_ou_v parametro { param_num++;} |
                   parametro { param_num++; }
+
+pv_ou_v: VIRGULA | PONTO_E_VIRGULA;
 
 parametro: IDENT {  strcpy(last_identifier, token); } DOIS_PONTOS tipo {
 //            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
@@ -217,8 +215,8 @@ declara_var : { }
               lista_id_var DOIS_PONTOS 
               tipo 
               { /* AMEM */
-                local_num_vars = update_var_type(table, token);
-                sprintf(temp_str, "AMEM %d", local_num_vars);
+                malloced_local_vars = update_var_type(table, token);
+                sprintf(temp_str, "AMEM %d", malloced_local_vars);
                 geraCodigo (NULL, temp_str); 
               }
               PONTO_E_VIRGULA
@@ -259,7 +257,7 @@ comando: comando_sem_rotulo |
     symb_pter = find_identifier(table, token);
     if (check_symbol_category(symb_pter, LABEL_SYMBOL_TYPE, NULL_CAT) == -1) return -1;
     // TODO: verificar se o número de variáveis locais está correto
-    sprintf(temp_str, "ENRT %d, %d", lexical_level, local_num_vars);
+    sprintf(temp_str, "ENRT %d %d", lexical_level, malloced_local_vars);
     // Gera ENRT k, n (nivel lexico atual, numero variaveis locais)
     label_to_string(symb_pter->values.label.label, label);
     geraCodigo(label, temp_str);
