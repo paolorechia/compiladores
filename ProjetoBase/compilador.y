@@ -384,7 +384,7 @@ acontinua: atribuicao | chamada_sem_parametro | chamada_com_parametros
 chamada_sem_parametro: { 
   symb_pter = find_identifier(table, last_identifier); 
   if (symb_pter == NULL) {
-    printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+    fprintf(stderr, "ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
     return -1;
   } else {
       if (check_symbol_category(symb_pter, PROCEDURE, FUNCTION) == -1) return -1;
@@ -392,14 +392,14 @@ chamada_sem_parametro: {
       if (symb_pter->category == PROCEDURE) {
         last_param_list = symb_pter->values.procedure.parameter_list;
         if (l_size(last_param_list) > 0) {
-          printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+          fprintf(stderr, "ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
           return -1;
         }
         label_to_string(symb_pter->values.procedure.label, label);
       } else {
         last_param_list = symb_pter->values.function.parameter_list;
         if (l_size(last_param_list) > 0) {
-          printf("ERROR: function signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+          fprintf(stderr, "ERROR: function signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
           return -1;
         }
         geraCodigo(NULL, "AMEM 1");
@@ -424,7 +424,7 @@ chamada_com_parametros: ABRE_PARENTESES {
   } 
   lista_parametros_chamada {
     if (l_size(caller_param_list) > 0) {
-      printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+      fprintf(stderr, "ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
       l_free(caller_param_list);
       return -1;
     }
@@ -433,7 +433,7 @@ chamada_com_parametros: ABRE_PARENTESES {
   FECHA_PARENTESES {
     symb_pter = find_identifier(table, last_identifier); 
     if (symb_pter == NULL) {
-      printf("ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+      fprintf(stderr, "ERROR: procedure %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
       return -1;
     } else {
       if (check_symbol_category(symb_pter, PROCEDURE, FUNCTION) == -1) return -1;
@@ -456,7 +456,7 @@ lista_parametros_chamada: lista_parametros_chamada VIRGULA parametro_chamada | p
 parametro_chamada: {
     list_node = pop_first(caller_param_list);
     if (list_node == NULL) {
-      printf("ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+      fprintf(stderr, "ERROR: procedure signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
       free(list_node);
       free(caller_param_list);
       return -1;
@@ -468,7 +468,7 @@ parametro_chamada: {
   if (type_check(&var_type_stack, nl) == -1) {
     char var_type_str[255];
     variable_type_to_string(list_node->variable_type, var_type_str);
-    printf("ERROR: procedure signature mismatch. Expecting type %s for parameter: %s\n", var_type_str, list_node->identifier);
+    fprintf(stderr, "ERROR: procedure signature mismatch. Expecting type %s for parameter: %s\n", var_type_str, list_node->identifier);
     free(list_node);
     free(caller_param_list);
     return -1;
@@ -483,13 +483,13 @@ atribuicao:
             DOIS_PONTOS_IGUAL {
                 symb_pter = find_identifier(table, last_identifier); 
                 if (symb_pter == NULL) {
-                  printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+                  fprintf(stderr, "ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
                   return -1;
                 }
                 if (symb_pter->category != VARIABLE && symb_pter->category != PARAMETER && symb_pter->category != FUNCTION) {
                   char category[255];
                   category_type_to_string(symb_pter->category, (char *) &category);
-                  printf("ERROR: Symbol %s is not a variable or a parameter! Declared as: %s\n", symb_pter->identifier, category);
+                  fprintf(stderr, "ERROR: Symbol %s is not a variable or a parameter! Declared as: %s\n", symb_pter->identifier, category);
                   return -1;
                 }
                 switch (symb_pter->category) {
@@ -589,7 +589,7 @@ elemento: num |
           /* Caso especial em que função não tem parâmetros */
             last_param_list = symb_pter->values.function.parameter_list;
             if (l_size(last_param_list) > 0) {
-              printf("ERROR: function signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
+              fprintf(stderr, "ERROR: function signature mismatch. Expecting %d parameters!\n", l_size(last_param_list));
               return -1;
             }
             geraCodigo(NULL, "AMEM 1");
@@ -637,7 +637,7 @@ empilha_variavel: {
   /*Procura variavel na tabela de simbolos e empilha endereco? */ 
     symb_pter = find_identifier(table, last_variable_identifier); 
     if (symb_pter == NULL) {
-        printf("ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
+        fprintf(stderr, "ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
         return -1;
     }
     switch(symb_pter->category) {
@@ -654,7 +654,7 @@ empilha_variavel: {
         push_type_stack(&var_type_stack, symb_pter->values.function.variable_type);
         break;
       default:
-        printf("ERROR: Invalid Category!\n");
+        fprintf(stderr, "ERROR: Invalid Category!\n");
         return -1;
     }
 }
@@ -729,10 +729,10 @@ void yyerror(char const * s) {
   while (fgets(buffer, sizeof(buffer), fp) && cl != nl - 1) {
     cl++;
   }
-  printf("At line: %d\n >>>>>>\n", nl);
-  printf("\t%d: %s", nl - 1, buffer);
+  fprintf(stderr, "At line: %d\n >>>>>>\n", nl);
+  fprintf(stderr, "\t%d: %s", nl - 1, buffer);
   fgets(buffer, sizeof(buffer), fp);
-  printf("\t%d: %s", nl, buffer);
+  fprintf(stderr, "\t%d: %s", nl, buffer);
 }
 
 int type_check(tvar_type_stack * var_type_stack, int nl) {
@@ -743,7 +743,7 @@ int type_check(tvar_type_stack * var_type_stack, int nl) {
     variable_type_to_string(t1, (char *) &var_type_str1);
     variable_type_to_string(t2, (char *) &var_type_str2);
     if (t1 != t2) {
-      printf("ERROR: Type mismatch at line %d: t1: %s, t2:%s\n", nl, var_type_str1, var_type_str2);
+      fprintf( stderr, "ERROR: Type mismatch at line %d: t1: %s, t2:%s\n", nl, var_type_str1, var_type_str2);
       return -1;
     }
     push_type_stack(var_type_stack, t1);

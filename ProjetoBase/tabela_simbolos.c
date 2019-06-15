@@ -525,7 +525,7 @@ int copy_parameters_to_table(symbol_table * table) {
   } else if (current_symbol->category == FUNCTION) {
     l_copy(current_symbol->values.function.parameter_list, params);
   } else {
-    printf("ERROR: Not a procedure or a function!\n");
+    fprintf(stderr, "ERROR: Not a procedure or a function!\n");
     return -1;
   }
   tnode * list_node;
@@ -600,7 +600,7 @@ int update_function_return_type(symbol_table * table, char * return_type_token) 
     i--;
   }
   if (idx == -1) { 
-    printf("ERROR: function symbol not found\n");
+    fprintf(stderr, "ERROR: function symbol not found\n");
     return -1;
   }
   symbol * function_symb = &(table->symbols[idx]);
@@ -628,7 +628,7 @@ int parse_var_type(char * token) {
       *ch = *ch - 32;
     }
     if (*ch < 65 || *ch > 90) {
-      printf("ERROR: Failed to parse variable type from token: %s at char %c!!!\n", token, *ch);
+      fprintf(stderr, "ERROR: Failed to parse variable type from token: %s at char %c!!!\n", token, *ch);
       printf("%d\n", *ch);
       return -1;
     }
@@ -646,7 +646,7 @@ int parse_var_type(char * token) {
   if ((test = strcmp(parsed_token, boolean)) == 0) {
     return BOOLEAN;
   }
-  printf("ERROR: Invalid variable type: '%s'. Must be either '%s' or '%s'\n", token, integer, boolean);
+  fprintf(stderr, "ERROR: Invalid variable type: '%s'. Must be either '%s' or '%s'\n", token, integer, boolean);
   return -1;
 }
 
@@ -686,7 +686,7 @@ int remove_local_vars(symbol_table * table) {
 symbol * find_identifier(symbol_table * table, char * identifier) {
   int idx = search_table(table, identifier);
   if (idx == -1) {
-    printf("ERROR: Symbol %s could not be found! Double check if it has been declared!\n", identifier);
+    fprintf(stderr, "ERROR: Symbol %s could not be found! Double check if it has been declared!\n", identifier);
     return NULL;
   }
   return &(table->symbols[idx]);
@@ -696,7 +696,7 @@ symbol * find_identifier(symbol_table * table, char * identifier) {
 symbol * find_local_identifier(symbol_table * table, char * identifier, int lexical_level) {
   int idx = local_search_table(table, identifier, lexical_level);
   if (idx == -1) {
-    printf("ERROR: Symbol %s could not be found at lexical level %d! Double check if it has been declared!\n", identifier, lexical_level);
+    fprintf(stderr, "ERROR: Symbol %s could not be found at lexical level %d! Double check if it has been declared!\n", identifier, lexical_level);
     return NULL;
   }
   return &(table->symbols[idx]);
@@ -724,7 +724,7 @@ int assemble_read_write_instruction(char * temp_str, const char * instruction, s
         ;
         char cat_str[255];
         category_type_to_string(symb_pter->category, cat_str);
-        printf("ERROR: Invalid Category: %s!\n", cat_str);
+        fprintf(stderr, "ERROR: Invalid Category: %s!\n", cat_str);
         return -1;
     }
     return 0;
@@ -732,7 +732,7 @@ int assemble_read_write_instruction(char * temp_str, const char * instruction, s
 
 int check_symbol_category(symbol * symb_pter, CategoryType cat_type, CategoryType cat_type2) {
       if (symb_pter == NULL) {
-        printf("ERROR: unexpected NULL pointer!. Aborting...\n");
+        fprintf(stderr, "ERROR: unexpected NULL pointer!. Aborting...\n");
         return -1;
       }
       if (symb_pter->category != cat_type && symb_pter->category != cat_type2) {
@@ -740,7 +740,7 @@ int check_symbol_category(symbol * symb_pter, CategoryType cat_type, CategoryTyp
         char expected_category[255];
         category_type_to_string(symb_pter->category, (char *) &category);
         category_type_to_string(cat_type, (char *) &expected_category);
-        printf("ERROR: Symbol %s is not a %s! Declared as: %s\n", symb_pter->identifier, expected_category, category);
+        fprintf(stderr, "ERROR: Symbol %s is not a %s! Declared as: %s\n", symb_pter->identifier, expected_category, category);
         return -1;
       }
       return 0;
