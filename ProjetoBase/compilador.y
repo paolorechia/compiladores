@@ -86,15 +86,18 @@ bloco       :
                 push_label_stack(&label_stack, label);
               } declara_subrotina { 
                 label_pter = pop_label_stack(&label_stack); 
-                print_label_stack(&label_stack);
+//                print_label_stack(&label_stack);
                 geraCodigo(label_pter, "NADA");
                 free(label_pter);
-                print_table(table);
               } comando_composto {
+                print_table(table);
                 remove_nested_subroutines(table, lexical_level);
                 removed_local_vars = remove_local_vars(table);
-                sprintf(temp_str, "DMEM %d", removed_local_vars);
-                geraCodigo (NULL, temp_str);
+                if (removed_local_vars > 0) {
+                  sprintf(temp_str, "DMEM %d", removed_local_vars);
+                  geraCodigo (NULL, temp_str);
+                };
+                print_table(table);
                 remove_parameters(table);
               }
 ;
@@ -701,7 +704,7 @@ main (int argc, char** argv) {
 
    yyin=fp;
    if (yyparse() == -1) {
-    printf(">>>>>>\n");
+    fprintf(stderr, ">>>>>>\n");
     char buffer[1024];
     int cl = 0;
     nl--;
@@ -709,7 +712,7 @@ main (int argc, char** argv) {
     while (fgets(buffer, sizeof(buffer), fp) && cl != nl) {
       cl++;
     }
-    printf("%s\n", buffer);
+    fprintf(stderr, "%s\n", buffer);
    }
 
    // print_type_stack(&var_type_stack);
