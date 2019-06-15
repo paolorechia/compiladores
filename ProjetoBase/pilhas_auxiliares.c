@@ -1,5 +1,6 @@
 #include "pilhas_auxiliares.h"
 #include "stdio.h"
+#include "stdlib.h"
 
 
 void init_type_stack(tvar_type_stack * type_stack) {
@@ -88,13 +89,16 @@ int push_label_stack(tlabel_stack * label_stack, char * label) {
   return 0;
 }
 
+// Caller must free returned label
 char * pop_label_stack(tlabel_stack * label_stack) {
   if (label_stack->idx <= 0) {
     printf("Label stack is empty!\n");
     return (char *) NULL;
   }
+  char * popped_label = (char * ) malloc(sizeof(char) * LABEL_MAX_SIZE);
+  strncpy(popped_label, label_stack->A[label_stack->idx], LABEL_MAX_SIZE);
   label_stack->idx--;
-  return (char * )&(label_stack->A[label_stack->idx + 1]);
+  return (char *) popped_label;
 }
 
 char * peek_label_stack(tlabel_stack * label_stack) {

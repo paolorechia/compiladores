@@ -636,7 +636,7 @@ symbol * find_identifier(symbol_table * table, char * identifier) {
 symbol * find_local_identifier(symbol_table * table, char * identifier, int lexical_level) {
   int idx = local_search_table(table, identifier, lexical_level);
   if (idx == -1) {
-    printf("ERROR: Symbol %s could not be found! Double check if it has been declared!\n", identifier);
+    printf("ERROR: Symbol %s could not be found at lexical level %d! Double check if it has been declared!\n", identifier, lexical_level);
     return NULL;
   }
   return &(table->symbols[idx]);
