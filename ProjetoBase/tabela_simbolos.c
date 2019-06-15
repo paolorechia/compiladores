@@ -516,6 +516,50 @@ int update_subroutine_parameters(symbol_table * table) {
   return updated_vars;
 }
 
+int copy_parameters_to_table(symbol_table * table) {
+  int idx = table->idx;
+  symbol * current_symbol = &(table->symbols[idx]);
+  thead * params = l_init();
+  if (current_symbol->category == PROCEDURE) {
+    l_copy(current_symbol->values.procedure.parameter_list, params);
+  } else if (current_symbol->category == FUNCTION) {
+    l_copy(current_symbol->values.function.parameter_list, params);
+  } else {
+    printf("ERROR: Not a procedure or a function!\n");
+    return -1;
+  }
+  tnode * list_node;
+  char var_type_str[TAM_TOKEN];
+  int updated_vars = 0;
+  while ( (list_node = pop_first(params)) != NULL)  {
+    variable_type_to_string(list_node->variable_type, var_type_str);
+    insert_parameter(
+      table,
+      list_node->identifier,
+      current_symbol->lexical_level,
+      var_type_str,
+      list_node->parameter_type
+    );
+    updated_vars++;
+  }
+  l_free(params);
+  return updated_vars;
+}
+
+int remove_parameters(symbol_table * table) {
+  int idx = table->idx;
+  symbol * current_symbol;
+  current_symbol = &(table->symbols[idx]);
+  int removed_parameters = 0;
+  while (idx >= 0 && current_symbol->category == PARAMETER) {
+    removed_parameters++; 
+    idx--;
+    current_symbol = &(table->symbols[idx]);
+  }
+  table->idx = idx;
+  return removed_parameters;
+}
+
 void insert_function(symbol_table * table, char * ident_token, int lexical_level, char * label) {
   symbol new_symbol;
   new_symbol.category = FUNCTION;
@@ -608,7 +652,7 @@ int update_var_type(symbol_table * table, char * token) {
   return updated_variables;
 }
 
-int remove_local_vars(symbol_table * table) { 
+int remove_local_vars(symbol_table * table) {
   int idx = table->idx;
   symbol * current_symbol;
   current_symbol = &(table->symbols[idx]);

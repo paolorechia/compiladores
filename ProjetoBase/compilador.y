@@ -14,6 +14,7 @@
 #include "pilhas_auxiliares.h"
 
 
+int declaring_subroutine = 0;
 int local_num_vars = 0;
 int param_num = 0;
 int lexical_level = 0;
@@ -183,12 +184,14 @@ lista_parametros:  lista_parametros VIRGULA parametro { param_num++;} |
                   parametro { param_num++; }
 
 parametro: IDENT {  strcpy(last_identifier, token); } DOIS_PONTOS tipo {
-            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
-            l_insert(last_param_list, last_identifier, tokenType, BYVAL);
+//            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
+            VariableType var_type = parse_var_type(token);
+            l_insert(last_param_list, last_identifier, var_type, BYVAL);
            } 
            | VAR IDENT  { strcpy(last_identifier, token); } DOIS_PONTOS tipo {
-            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYREFERENCE);
-            l_insert(last_param_list, last_identifier, tokenType, BYREFERENCE);
+//            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYREFERENCE);
+            VariableType var_type = parse_var_type(token);
+            l_insert(last_param_list, last_identifier, var_type, BYREFERENCE);
            }
 
 parte_declara_vars:  var 

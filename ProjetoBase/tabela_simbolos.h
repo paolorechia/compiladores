@@ -101,6 +101,8 @@ int label_to_integer(char * input_str);
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
 void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label);
 int update_subroutine_parameters(symbol_table * table);
+int copy_parameters_to_table(symbol_table * table);
+int remove_parameters(symbol_table * table);
 VariableType insert_parameter(symbol_table * table, char * ident_token, int lexical_level, char *  var_type_str, ParameterType param_type);
 void insert_function(symbol_table * table, char * ident_token, int lexical_level, char * label);
 int update_function_return_type(symbol_table * table, char * token);
