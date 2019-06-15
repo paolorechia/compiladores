@@ -91,7 +91,7 @@ bloco       :
                 free(label_pter);
                 print_table(table);
               } comando_composto {
-                remove_nested_procedures(table, lexical_level);
+                remove_nested_subroutines(table, lexical_level);
                 removed_local_vars = remove_local_vars(table);
                 sprintf(temp_str, "DMEM %d", removed_local_vars);
                 geraCodigo (NULL, temp_str);
