@@ -55,7 +55,7 @@ extern char * yytext;
 %token MENOR MAIOR IGUAL
 %token PROCEDURE_TOKEN FUNCTION_TOKEN
 %token IF WHILE DO THEN ELSE NUMERO
-%token MAIS MENOS ASTERICO BARRA
+%token MAIS MENOS ASTERICO DIV BARRA
 %token AND OR TRUE FALSE
 %token READ WRITE
 %token LABEL GOTO
@@ -66,21 +66,30 @@ extern char * yytext;
 %%
 
 programa    :{ 
-             geraCodigo (NULL, "INPP"); 
+               geraCodigo (NULL, "INPP"); 
              }
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
 //             print_table(table);
-//             local_num_vars = remove_local_vars(table);
-             sprintf(temp_str, "DMEM %d", local_num_vars);
-             geraCodigo (NULL, temp_str);
-             geraCodigo (NULL, "PARA"); 
+               geraCodigo (NULL, "PARA"); 
              }
 ;
 
 bloco       : 
-              declara_rotulos parte_declara_vars declara_subrotina comando_composto
+              declara_rotulos parte_declara_vars {
+                generate_label(&label_counter, (char *)label);
+                sprintf(temp_str, "DSVS %s", label);
+                geraCodigo(NULL, temp_str);
+                push_label_stack(&label_stack, label);
+              } declara_subrotina { 
+                label_pter = pop_label_stack(&label_stack); 
+                geraCodigo(label_pter, "NADA");
+              } comando_composto {
+                local_num_vars = remove_local_vars(table);
+                sprintf(temp_str, "DMEM %d", local_num_vars);
+                geraCodigo (NULL, temp_str);
+              }
 ;
 
 
@@ -91,9 +100,8 @@ lista_rotulos: lista_rotulos VIRGULA declara_rotulo | declara_rotulo
 ; 
 
 declara_rotulo: NUMERO { 
-    // TODO: insere rotulo na tabela de simbolos 
-    generate_label(&label_counter, (char * )label);
-    insert_label(table, token, lexical_level, label);
+      generate_label(&label_counter, (char * )label);
+      insert_label(table, token, lexical_level, label);
    }
 ;
 
@@ -107,18 +115,10 @@ lista_subrotinas: lista_subrotinas declara_procedimento | declara_procedimento |
 
 declara_procedimento: PROCEDURE_TOKEN IDENT {
                         lexical_level++;
-
-                        generate_label(&label_counter, (char * )label);
-                        push_label_stack(&label_stack, label);
-                        sprintf(temp_str, "DSVS %s", label);
-                        geraCodigo(NULL, temp_str);
-
                         generate_label(&label_counter, (char * )label);
                         push_label_stack(&label_stack, label);
                         sprintf(temp_str, "ENPR %d", lexical_level);
-                        label_pter = pop_label_stack(&label_stack);
-                        geraCodigo(label_pter, temp_str);
-
+                        geraCodigo(label, temp_str);
                         insert_procedure(table, token, lexical_level, label);
                         last_param_list = peek_table(table)->values.procedure.parameter_list;
                         push_istack(&offset_stack, 0);
@@ -131,10 +131,8 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                       PONTO_E_VIRGULA 
                       bloco {
 //                        print_table(table);
-                        sprintf(temp_str, "DMEM %d", remove_local_vars(table));
-                        geraCodigo(NULL, temp_str);
                         // TODO: verificar se param_num funciona corretamente 
-                        sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
+                        sprintf(temp_str, "RTPR %d, %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         label_pter = pop_label_stack(&label_stack); 
                         geraCodigo(label_pter, "NADA");
@@ -147,18 +145,11 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
 
 declara_funcao: FUNCTION_TOKEN IDENT {
                         lexical_level++;
-
-                        generate_label(&label_counter, (char * )label);
-                        push_label_stack(&label_stack, label);
-                        sprintf(temp_str, "DSVS %s", label);
-                        geraCodigo(NULL, temp_str);
-
                         generate_label(&label_counter, (char * )label);
                         push_label_stack(&label_stack, label);
                         sprintf(temp_str, "ENPR %d", lexical_level);
                         label_pter = pop_label_stack(&label_stack);
                         geraCodigo(label_pter, temp_str);
-
                         insert_function(table, token, lexical_level, label);
                         last_param_list = peek_table(table)->values.function.parameter_list;
                         push_istack(&offset_stack, 0);
@@ -174,8 +165,6 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                       } PONTO_E_VIRGULA 
                       bloco {
 //                        print_table(table);
-                        sprintf(temp_str, "DMEM %d", remove_local_vars(table));
-                        geraCodigo(NULL, temp_str);
                         // TODO: verificar se param_num funciona corretamente 
                         sprintf(temp_str, "RTPR %d %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
@@ -207,7 +196,7 @@ parte_declara_vars:  var
 
 
 var         : { } VAR declara_vars { 
-                    //print_table(table); 
+//                    print_table(table); 
                     } 
             |
 ;
@@ -554,7 +543,7 @@ expressao_simples: expressao_simples MAIS termo
                   termo
 ;
 
-termo: termo BARRA fator 
+termo: termo DIV fator 
         { geraCodigo(NULL, "DIVI"); 
           if (type_check(&var_type_stack, nl) == -1) return -1;
         } |

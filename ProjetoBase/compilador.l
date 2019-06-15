@@ -148,6 +148,12 @@ end { simbolo = simb_end;
           return BARRA;
  }
 
+div  { simbolo = simb_div;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" div ");
+          return DIV;
+ }
+
 and  { simbolo = simb_and;  
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" and ");

@@ -1,5 +1,6 @@
 program proc1 (input, output);
   var x, y: integer;
+         u: boolean;
   procedure p;
     var z, w, k: integer;
     procedure q;
