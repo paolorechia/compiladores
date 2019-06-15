@@ -560,6 +560,21 @@ int remove_parameters(symbol_table * table) {
   return removed_parameters;
 }
 
+int remove_nested_procedures(symbol_table * table, int current_lexical_level) {
+  int idx = table->idx;
+  symbol * current_symbol;
+  current_symbol = &(table->symbols[idx]);
+  int removed_procedures = 0;
+  while (idx >= 0 && current_symbol->category == PROCEDURE && 
+          current_symbol->lexical_level > current_lexical_level) {
+    removed_procedures++; 
+    idx--;
+    current_symbol = &(table->symbols[idx]);
+  }
+  table->idx = idx;
+  return removed_procedures;
+}
+
 void insert_function(symbol_table * table, char * ident_token, int lexical_level, char * label) {
   symbol new_symbol;
   new_symbol.category = FUNCTION;

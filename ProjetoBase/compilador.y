@@ -88,7 +88,9 @@ bloco       :
                 print_label_stack(&label_stack);
                 geraCodigo(label_pter, "NADA");
                 free(label_pter);
+                print_table(table);
               } comando_composto {
+                remove_nested_procedures(table, lexical_level);
                 local_num_vars = remove_local_vars(table);
                 sprintf(temp_str, "DMEM %d", local_num_vars);
                 geraCodigo (NULL, temp_str);
