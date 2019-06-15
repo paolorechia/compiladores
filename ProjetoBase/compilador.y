@@ -351,21 +351,19 @@ comando_repetitivo: WHILE {
                           }
                     expr {
                             label_pter = pop_label_stack(&label_stack);
-                            label_pter2 = pop_label_stack(&label_stack);
-                            sprintf(temp_str, "DSVF %s", label_pter2);
+                            sprintf(temp_str, "DSVF %s", label_pter);
                             geraCodigo(NULL, temp_str);
-                            push_label_stack(&label_stack, label_pter2);
-                            push_label_stack(&label_stack, label_pter);
+                            push_label_stack(&label_stack, label);
                             free(label_pter);
-                            free(label_pter2);
                          }
                     DO
                     comando_sem_rotulo_ou_composto { }
                     { 
+                      label_pter2 = pop_label_stack(&label_stack);
                       label_pter = pop_label_stack(&label_stack);
                       sprintf(temp_str, "DSVS %s", label_pter);
                       geraCodigo(NULL, temp_str);
-                      geraCodigo(label_pter, "NADA");
+                      geraCodigo(label_pter2, "NADA");
                       free(label_pter);
                     }
 ;
