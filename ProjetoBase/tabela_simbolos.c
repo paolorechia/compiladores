@@ -143,25 +143,25 @@ int insert_table(symbol_table * table, symbol new_symbol){
   saved_symbol->category = new_symbol.category;
   switch(new_symbol.category) {
     case VARIABLE:
-      saved_symbol->values.variable.lexical_level = new_symbol.values.variable.lexical_level;
+      saved_symbol->lexical_level = new_symbol.lexical_level;
       saved_symbol->values.variable.offset= new_symbol.values.variable.offset;
       saved_symbol->values.variable.variable_type= new_symbol.values.variable.variable_type;
       break;
     case PARAMETER:
-      saved_symbol->values.parameter.lexical_level = new_symbol.values.parameter.lexical_level;
+      saved_symbol->lexical_level = new_symbol.lexical_level;
       saved_symbol->values.parameter.offset= new_symbol.values.parameter.offset;
       saved_symbol->values.parameter.variable_type = new_symbol.values.parameter.variable_type;
       saved_symbol->values.parameter.parameter_type= new_symbol.values.parameter.parameter_type;
       break;
     case PROCEDURE:
-      saved_symbol->values.procedure.lexical_level = new_symbol.values.procedure.lexical_level;
+      saved_symbol->lexical_level = new_symbol.lexical_level;
       saved_symbol->values.procedure.label = new_symbol.values.procedure.label;
       saved_symbol->values.procedure.parameter_list = l_init(); 
       l_copy(new_symbol.values.procedure.parameter_list, saved_symbol->values.procedure.parameter_list);
       break;
     case FUNCTION:
     /*TODO: check if this part is OK */
-      saved_symbol->values.function.lexical_level = new_symbol.values.function.lexical_level;
+      saved_symbol->lexical_level = new_symbol.lexical_level;
       saved_symbol->values.function.label = new_symbol.values.function.label;
       saved_symbol->values.function.variable_type = UNDEFINED;
       saved_symbol->values.function.offset = -1;
@@ -169,7 +169,7 @@ int insert_table(symbol_table * table, symbol new_symbol){
       l_copy(new_symbol.values.function.parameter_list, saved_symbol->values.function.parameter_list);
       break;
     case LABEL_SYMBOL_TYPE:
-      saved_symbol->values.label.lexical_level = new_symbol.values.label.lexical_level;
+      saved_symbol->lexical_level = new_symbol.lexical_level;
       saved_symbol->values.label.label = new_symbol.values.label.label;
       break;
     default:
@@ -204,6 +204,20 @@ int search_table(symbol_table * table, char id[TAM_TOKEN]){
     }
     i--;
   }
+  return idx;
+}
+
+int local_search_table(symbol_table * table, char id[TAM_TOKEN], int lexical_level){
+  int idx = -1;
+  int i = table->idx;
+  /*
+  while (i >= 0 && idx == -1) {
+    if (strcmp(table->symbols[i].identifier, id) == 0 && (table->symbols[i]) {
+      idx = i;
+    }
+    i--;
+  }
+  */
   return idx;
 }
 
@@ -253,7 +267,7 @@ void print_variable_symbol(symbol s) {
       break;
   }
   printf("| %s  | VARIABLE | lexical_level: %d | offset: %d | type: %s |\n",
-            s.identifier, s.values.variable.lexical_level, s.values.variable.offset, 
+            s.identifier, s.lexical_level, s.values.variable.offset, 
             var_type_str);
 
 }
@@ -282,7 +296,7 @@ void print_parameter_symbol(symbol s) {
       break;
   }
   printf("| %s | PARAMETER | lexical_level: %d | offset: %d | type: %s | param: %s\n",
-            s.identifier, s.values.parameter.lexical_level, s.values.parameter.offset, 
+            s.identifier, s.lexical_level, s.values.parameter.offset, 
             var_type_str, param_type_str);
 }
 
@@ -382,7 +396,7 @@ void print_procedure_symbol(symbol s) {
   char label_string[LABEL_MAX_SIZE];
   label_to_string(s.values.procedure.label, (char * ) &label_string);
   printf("| %s | PROCEDURE | lexical_level: %d | label: %s | params: %s\n",
-            s.identifier, s.values.procedure.lexical_level, label_string,
+            s.identifier, s.lexical_level, label_string,
             params_string);
 }
 
@@ -439,7 +453,7 @@ void print_function_symbol(symbol s) {
   char label_string[LABEL_MAX_SIZE];
   label_to_string(s.values.function.label, (char * ) &label_string);
   printf("| %s | FUNCTION | lexical_level: %d | label: %s | var_type: %s | return_offset: %d | params: %s\n",
-            s.identifier, s.values.function.lexical_level, label_string,
+            s.identifier, s.lexical_level, label_string,
             return_type_str, s.values.function.offset, params_string);
 }
 
@@ -447,7 +461,7 @@ void print_label_symbol(symbol s) {
   char label_string[LABEL_MAX_SIZE];
   label_to_string(s.values.label.label, (char * ) &label_string);
   printf("| %s | LABEL_SYMBOL_TYPE| lexical_level: %d | label: %s\n",
-            s.identifier, s.values.label.lexical_level, label_string);
+            s.identifier, s.lexical_level, label_string);
 }
 
 
@@ -455,7 +469,7 @@ int insert_variable(symbol_table * table, char * identifier, int lexical_level, 
   symbol new_symbol;
   new_symbol.category = VARIABLE;
   strcpy(new_symbol.identifier, identifier);
-  new_symbol.values.variable.lexical_level = lexical_level;
+  new_symbol.lexical_level = lexical_level;
   new_symbol.values.variable.offset = offset;
   new_symbol.values.variable.variable_type = UNDEFINED;
   insert_table(table, new_symbol);
@@ -467,7 +481,7 @@ void insert_procedure(symbol_table * table, char * ident_token, int lexical_leve
   symbol new_symbol;
   new_symbol.category = PROCEDURE;
   strcpy(new_symbol.identifier, ident_token);
-  new_symbol.values.procedure.lexical_level = lexical_level;
+  new_symbol.lexical_level = lexical_level;
   new_symbol.values.procedure.label = label_to_integer(label);
   new_symbol.values.procedure.parameter_list = l_init();
   insert_table(table, new_symbol);
@@ -478,7 +492,7 @@ VariableType insert_parameter(symbol_table * table, char * ident_token, int lexi
   symbol new_symbol;
   strcpy(new_symbol.identifier, ident_token);
   new_symbol.category = PARAMETER;
-  new_symbol.values.parameter.lexical_level= (short) lexical_level;
+  new_symbol.lexical_level= lexical_level;
   new_symbol.values.parameter.offset= 0;
   new_symbol.values.parameter.variable_type = var_type;
   new_symbol.values.parameter.parameter_type = param_type;
@@ -487,7 +501,7 @@ VariableType insert_parameter(symbol_table * table, char * ident_token, int lexi
 }
 
 int update_subroutine_parameters(symbol_table * table) {
-  short current_offset = -4;
+  int current_offset = -4;
   int idx = table->idx;
   symbol * current_symbol;
   current_symbol = &(table->symbols[idx]);
@@ -506,7 +520,7 @@ void insert_function(symbol_table * table, char * ident_token, int lexical_level
   symbol new_symbol;
   new_symbol.category = FUNCTION;
   strcpy(new_symbol.identifier, ident_token);
-  new_symbol.values.function.lexical_level = (int8_t) lexical_level;
+  new_symbol.lexical_level = (int8_t) lexical_level;
   new_symbol.values.function.label =  (int8_t) label_to_integer(label);
   new_symbol.values.function.parameter_list = l_init();
   insert_table(table, new_symbol);
@@ -539,7 +553,7 @@ void insert_label(symbol_table * table, char * ident_token, int lexical_level, c
   symbol new_symbol;
   new_symbol.category = LABEL_SYMBOL_TYPE;
   strcpy(new_symbol.identifier, ident_token);
-  new_symbol.values.label.lexical_level = (int32_t) lexical_level;
+  new_symbol.lexical_level = (int32_t) lexical_level;
   new_symbol.values.label.label =  (int32_t) label_to_integer(label);
   insert_table(table, new_symbol);
 }
@@ -608,8 +622,19 @@ int remove_local_vars(symbol_table * table) {
   return removed_vars;
 }
 
+// Finds first identifier regardless of lexical level
 symbol * find_identifier(symbol_table * table, char * identifier) {
   int idx = search_table(table, identifier);
+  if (idx == -1) {
+    printf("ERROR: Symbol %s could not be found! Double check if it has been declared!\n", identifier);
+    return NULL;
+  }
+  return &(table->symbols[idx]);
+}
+
+// Attempts to find identifier at given lexical level
+symbol * find_local_identifier(symbol_table * table, char * identifier, int lexical_level) {
+  int idx = local_search_table(table, identifier, lexical_level);
   if (idx == -1) {
     printf("ERROR: Symbol %s could not be found! Double check if it has been declared!\n", identifier);
     return NULL;
@@ -622,17 +647,17 @@ int assemble_read_write_instruction(char * temp_str, const char * instruction, s
   switch(symb_pter->category) {
       case VARIABLE:
         sprintf(temp_str, "%s %d, %d", instruction,
-                                       symb_pter->values.variable.lexical_level,
+                                       symb_pter->lexical_level,
                                        symb_pter->values.variable.offset);
       break;
       case PARAMETER:
-        sprintf(temp_str, "%s %hd, %hd", instruction,
-                                       symb_pter->values.parameter.lexical_level,
+        sprintf(temp_str, "%s %d, %d", instruction,
+                                       symb_pter->lexical_level,
                                        symb_pter->values.parameter.offset);
       break;
       case FUNCTION:
-        sprintf(temp_str, "%s %hd, %hd", instruction,
-                                       symb_pter->values.function.lexical_level,
+        sprintf(temp_str, "%s %d, %d", instruction,
+                                       symb_pter->lexical_level,
                                        symb_pter->values.function.offset);
       break;
       default:

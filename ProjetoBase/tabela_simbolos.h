@@ -28,30 +28,25 @@ typedef struct head{
 /* Proper Symbol Table struct */
 typedef union level {
   struct variable {
-    int32_t lexical_level;
     int32_t offset;
     VariableType variable_type;
   } variable;
   struct parameter {
-    int16_t lexical_level;
-    int16_t offset;
+    int32_t offset;
     VariableType variable_type;
     ParameterType parameter_type;
   } parameter;
   struct procedure {
-    int32_t lexical_level;
     int32_t label;
     thead * parameter_list;
   } procedure;
   struct function {
-    int8_t lexical_level;
-    int8_t label;
-    int8_t offset;
+    int32_t label;
+    int32_t offset;
     VariableType variable_type;
     thead * parameter_list;
   } function;
   struct label {
-    int32_t lexical_level;
     int32_t label;
   } label;
 } symbol_union;
@@ -59,6 +54,7 @@ typedef union level {
 
 typedef struct {
   char identifier[TAM_TOKEN];
+  int32_t lexical_level;
   CategoryType category; 
   symbol_union values; 
 } symbol;
@@ -88,6 +84,7 @@ void free_table(symbol_table * table);
 int insert_table(symbol_table * table, symbol new_symbol);
 int remove_table(symbol_table * table, int number_to_remove);
 int search_table(symbol_table * table, char id[TAM_TOKEN]);
+int local_search_table(symbol_table * table, char id[TAM_TOKEN], int lexical_level);
 symbol * peek_table(symbol_table * table);
 void print_table(symbol_table * table);
 void print_variable_symbol(symbol s);
@@ -112,6 +109,7 @@ int parse_var_type(char * token);
 int update_var_type(symbol_table * table, char * token);
 int remove_local_vars(symbol_table * table);
 symbol * find_identifier(symbol_table * table, char * identifier);
+symbol * find_local_identifier(symbol_table * table, char * identifier, int lexical_level);
 int assemble_read_write_instruction(char * temp_str, const char * instruction, symbol * symp_pter);
 int check_symbol_category(symbol * symb_pter, CategoryType cat_type, CategoryType cat_type2);
 
