@@ -96,9 +96,11 @@ bloco       :
                 free(label_pter);
               }
               comando_composto {
+                /*
                 printf("Leaving block... before cleaning up...\n");
                 printf("Lexical level: %d\n", lexical_level);
                 print_table(table);
+                */
                 remove_nested_subroutines(table, lexical_level);
                 removed_local_vars = remove_local_vars(table);
                 if (removed_local_vars > 0) {
@@ -106,8 +108,10 @@ bloco       :
                   geraCodigo (NULL, temp_str);
                 };
                 remove_parameters(table);
+                /*
                 printf("Leaving block... after cleaning up...\n");
                 print_table(table);
+                */
               }
 ;
 
@@ -148,11 +152,11 @@ declara_subrotina: declara_cabecalho_procedure FORWARD PONTO_E_VIRGULA {
                         generate_label(&label_counter, (char * )label);
                         insert_procedure(table, last_procedure_identifier, lexical_level, label, declaring_param_list);
                       }
-                      print_table(table);
+                      // print_table(table);
                       // Entrada em bloco do procedimento
                       copy_parameters_to_table_from_id(table, last_procedure_identifier);
                       update_subroutine_parameters(table);
-                      print_table(table);
+                      // print_table(table);
                       sprintf(temp_str, "ENPR %d", lexical_level);
                       geraCodigo(label, temp_str);
                    } declara_procedure_bloco |
@@ -180,7 +184,7 @@ declara_procedure_bloco: bloco {
 
 
 declara_funcao: FUNCTION_TOKEN IDENT {
-                        print_table(table);
+                        // print_table(table);
                         lexical_level++;
                         generate_label(&label_counter, (char * )label);
                         sprintf(temp_str, "ENPR %d", lexical_level);
@@ -189,7 +193,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         declaring_param_list = peek_table(table)->values.function.parameter_list;
                         push_istack(&offset_stack, 0);
                         param_num = 0; 
-                        print_table(table);
+                        // print_table(table);
                       }
                       lp
                       DOIS_PONTOS IDENT {
@@ -205,7 +209,7 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         geraCodigo(NULL, temp_str);
                         lexical_level--;
                         pop_istack(&offset_stack);
-                        print_table(table);
+                        // print_table(table);
                       }
                      PONTO_E_VIRGULA
 ;
@@ -616,6 +620,7 @@ elemento: num |
           ident_variavel empilha_variavel {
           /* Desempilha endereco da memoria da pilha */
           symb_pter = pop_symbol_stack(&symbol_stack);
+          // print_table(table);
           if (symb_pter->category == FUNCTION) {
           /* Caso especial em que função não tem parâmetros */
             last_param_list = symb_pter->values.function.parameter_list;

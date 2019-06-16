@@ -549,7 +549,6 @@ int copy_parameters_to_table(symbol_table * table) {
 int copy_parameters_to_table_from_id(symbol_table * table, char * identifier) {
   int idx = table->idx;
   symbol * current_symbol = find_identifier(table, identifier);
-  printf("%s\n", current_symbol->identifier);
   thead * params = l_init();
   if (current_symbol->category == PROCEDURE) {
     l_copy(current_symbol->values.procedure.parameter_list, params);
