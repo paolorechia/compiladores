@@ -30,6 +30,7 @@ char last_variable_identifier[TAM_TOKEN];
 char last_instruction[TAM_TOKEN];
 char temp_str[TAM_TOKEN];
 
+thead * declaring_param_list;
 thead * last_param_list;
 thead * caller_param_list;
 tnode * list_node; 
@@ -84,7 +85,8 @@ bloco       :
                 sprintf(temp_str, "DSVS %s", label);
                 geraCodigo(NULL, temp_str);
                 push_label_stack(&label_stack, label);
-              } declara_subrotina { 
+              } 
+              bloco_subrotina { 
                 label_pter = pop_label_stack(&label_stack); 
 //                print_label_stack(&label_stack);
                 geraCodigo(label_pter, "NADA");
@@ -105,7 +107,6 @@ bloco       :
               }
 ;
 
-
 declara_rotulos: LABEL lista_rotulos PONTO_E_VIRGULA |
 ;
 
@@ -119,12 +120,21 @@ declara_rotulo: NUMERO {
 ;
 
 
-declara_subrotina: lista_subrotinas |
+blobo_subrotina: lista_subrotinas |
 ;
 
 
-lista_subrotinas: lista_subrotinas declara_procedimento | declara_procedimento | lista_subrotinas declara_funcao | declara_funcao
+lista_subrotinas: lista_subrotinas declara_subrotina | declara_subrotina 
 ;
+
+declara_subrotina: declara_cabecalho_subrotina FORWARD PONTO_E_VIRGULA |
+                   declara_cabecalho_subrotina declara_subrotina_bloco;
+
+declara_cabecalho_procedimento: PROCEDURE_TOKEN lp PONTO_E_VIRGULA;
+
+continua_subrotina: FORWARD PONTO_E_VIRGULA | declara_subrotina_bloco;
+
+declara_subrotina_bloco: bloco PONTO_E_VIRGULA;
 
 declara_procedimento: PROCEDURE_TOKEN IDENT {
                         lexical_level++;
@@ -132,15 +142,11 @@ declara_procedimento: PROCEDURE_TOKEN IDENT {
                         sprintf(temp_str, "ENPR %d", lexical_level);
                         geraCodigo(label, temp_str);
                         insert_procedure(table, token, lexical_level, label);
-                        last_param_list = peek_table(table)->values.procedure.parameter_list;
+                        declaring_param_list = l_init();
                         push_istack(&offset_stack, 0);
                         param_num = 0; 
                       }
-                      lp {
-                        copy_parameters_to_table(table);
-                        update_subroutine_parameters(table);
-//                        print_table(table);
-                      }
+                      lp
                       PONTO_E_VIRGULA 
                       bloco {
 //                        print_table(table);
@@ -160,15 +166,11 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         sprintf(temp_str, "ENPR %d", lexical_level);
                         geraCodigo(label, temp_str);
                         insert_function(table, token, lexical_level, label);
-                        last_param_list = peek_table(table)->values.function.parameter_list;
+                        declaring_param_list = l_init();
                         push_istack(&offset_stack, 0);
                         param_num = 0; 
                       }
-                      lp {
-                        copy_parameters_to_table(table);
-                        update_subroutine_parameters(table);
-//                        print_table(table);
-                      }
+                      lp
                       DOIS_PONTOS IDENT {
                         /* Acrescentar retorno de funcao na tabela simbolos */
                         if (update_function_return_type(table, token) == -1) return -1;
@@ -184,7 +186,13 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                      PONTO_E_VIRGULA
 ;
 
-lp: ABRE_PARENTESES  lista_parametros FECHA_PARENTESES | ABRE_PARENTESES FECHA_PARENTESES |
+lp: ABRE_PARENTESES  lista_parametros  {
+                        copy_parameters_to_table(table);
+                        update_subroutine_parameters(table);
+                        }
+    FECHA_PARENTESES | 
+    ABRE_PARENTESES FECHA_PARENTESES |
+
 ;
 
 lista_parametros:  lista_parametros pv_ou_v parametro { param_num++;} |
@@ -195,12 +203,12 @@ pv_ou_v: VIRGULA | PONTO_E_VIRGULA;
 parametro: IDENT {  strcpy(last_identifier, token); } DOIS_PONTOS tipo {
 //            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
             VariableType var_type = parse_var_type(token);
-            l_insert(last_param_list, last_identifier, var_type, BYVAL);
+            l_insert(declaring_param_list, last_identifier, var_type, BYVAL);
            } 
            | VAR IDENT  { strcpy(last_identifier, token); } DOIS_PONTOS tipo {
 //            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYREFERENCE);
             VariableType var_type = parse_var_type(token);
-            l_insert(last_param_list, last_identifier, var_type, BYREFERENCE);
+            l_insert(declaring_param_list, last_identifier, var_type, BYREFERENCE);
            }
 
 parte_declara_vars:  var 
@@ -640,7 +648,7 @@ num: NUMERO {
 
 
 empilha_variavel: { 
-  /*Procura variavel na tabela de simbolos e empilha endereco? */ 
+  /* `Procura variavel na tabela de simbolos e empilha endereco */ 
     symb_pter = find_identifier(table, last_variable_identifier); 
     if (symb_pter == NULL) {
         fprintf(stderr, "ERROR: variable %s was not found! Double check that you've declared it!\n", symb_pter->identifier);
