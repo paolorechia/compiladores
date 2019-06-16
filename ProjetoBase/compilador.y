@@ -163,6 +163,7 @@ declara_subrotina: declara_cabecalho_procedure FORWARD PONTO_E_VIRGULA {
 declara_cabecalho_procedure: PROCEDURE_TOKEN IDENT {
                           strncpy(last_procedure_identifier, token, TAM_TOKEN);
                           declaring_param_list = l_init();
+                          push_istack(&offset_stack, 0);
                           param_num = 0; 
                         } lp PONTO_E_VIRGULA;
 
@@ -171,6 +172,7 @@ declara_procedure_bloco: bloco {
                         sprintf(temp_str, "RTPR %d, %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         lexical_level--;
+                        pop_istack(&offset_stack);
 //                        print_table(table);
                       }
                      PONTO_E_VIRGULA
@@ -178,16 +180,21 @@ declara_procedure_bloco: bloco {
 
 
 declara_funcao: FUNCTION_TOKEN IDENT {
+                        print_table(table);
                         lexical_level++;
                         generate_label(&label_counter, (char * )label);
                         sprintf(temp_str, "ENPR %d", lexical_level);
                         geraCodigo(label, temp_str);
                         insert_function(table, token, lexical_level, label);
-                        declaring_param_list = l_init();
+                        declaring_param_list = peek_table(table)->values.function.parameter_list;
+                        push_istack(&offset_stack, 0);
                         param_num = 0; 
+                        print_table(table);
                       }
                       lp
                       DOIS_PONTOS IDENT {
+                        copy_parameters_to_table(table);
+                        update_subroutine_parameters(table);
                         /* Acrescentar retorno de funcao na tabela simbolos */
                         if (update_function_return_type(table, token) == -1) return -1;
                       } PONTO_E_VIRGULA 
@@ -197,6 +204,8 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         sprintf(temp_str, "RTPR %d, %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         lexical_level--;
+                        pop_istack(&offset_stack);
+                        print_table(table);
                       }
                      PONTO_E_VIRGULA
 ;
