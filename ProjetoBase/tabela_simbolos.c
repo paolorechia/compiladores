@@ -210,14 +210,13 @@ int search_table(symbol_table * table, char id[TAM_TOKEN]){
 int local_search_table(symbol_table * table, char id[TAM_TOKEN], int lexical_level){
   int idx = -1;
   int i = table->idx;
-  /*
   while (i >= 0 && idx == -1) {
-    if (strcmp(table->symbols[i].identifier, id) == 0 && (table->symbols[i]) {
+    if (strcmp(table->symbols[i].identifier, id) == 0 && 
+       table->symbols[i].lexical_level == lexical_level) {
       idx = i;
     }
     i--;
   }
-  */
   return idx;
 }
 
@@ -476,13 +475,15 @@ int insert_variable(symbol_table * table, char * identifier, int lexical_level, 
   return offset;
 }
 
-void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label) {
+void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label, thead * parameter_list) {
   symbol new_symbol;
   new_symbol.category = PROCEDURE;
   strcpy(new_symbol.identifier, ident_token);
   new_symbol.lexical_level = lexical_level;
   new_symbol.values.procedure.label = label_to_integer(label);
   new_symbol.values.procedure.parameter_list = l_init();
+  l_copy(parameter_list, new_symbol.values.procedure.parameter_list);
+  l_free(parameter_list);
   insert_table(table, new_symbol);
 }
 
@@ -518,6 +519,37 @@ int update_subroutine_parameters(symbol_table * table) {
 int copy_parameters_to_table(symbol_table * table) {
   int idx = table->idx;
   symbol * current_symbol = &(table->symbols[idx]);
+  thead * params = l_init();
+  if (current_symbol->category == PROCEDURE) {
+    l_copy(current_symbol->values.procedure.parameter_list, params);
+  } else if (current_symbol->category == FUNCTION) {
+    l_copy(current_symbol->values.function.parameter_list, params);
+  } else {
+    fprintf(stderr, "ERROR: Not a procedure or a function!\n");
+    return -1;
+  }
+  tnode * list_node;
+  char var_type_str[TAM_TOKEN];
+  int updated_vars = 0;
+  while ( (list_node = pop_first(params)) != NULL)  {
+    variable_type_to_string(list_node->variable_type, var_type_str);
+    insert_parameter(
+      table,
+      list_node->identifier,
+      current_symbol->lexical_level,
+      var_type_str,
+      list_node->parameter_type
+    );
+    updated_vars++;
+  }
+  l_free(params);
+  return updated_vars;
+}
+
+int copy_parameters_to_table_from_id(symbol_table * table, char * identifier) {
+  int idx = table->idx;
+  symbol * current_symbol = find_identifier(table, identifier);
+  printf("%s\n", current_symbol->identifier);
   thead * params = l_init();
   if (current_symbol->category == PROCEDURE) {
     l_copy(current_symbol->values.procedure.parameter_list, params);
@@ -698,7 +730,6 @@ symbol * find_identifier(symbol_table * table, char * identifier) {
 symbol * find_local_identifier(symbol_table * table, char * identifier, int lexical_level) {
   int idx = local_search_table(table, identifier, lexical_level);
   if (idx == -1) {
-    fprintf(stderr, "ERROR: Symbol %s could not be found at lexical level %d! Double check if it has been declared!\n", identifier, lexical_level);
     return NULL;
   }
   return &(table->symbols[idx]);

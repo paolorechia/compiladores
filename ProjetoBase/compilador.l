@@ -244,6 +244,12 @@ function { simbolo = simb_function;
           return FUNCTION_TOKEN;
  }
 
+forward { simbolo = simb_forward;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" forward ");
+          return FORWARD;
+ }
+
 {numero} { simbolo = simb_numero;
               strncpy(token, yytext, TAM_TOKEN);
               IMPRIME(" numero ");

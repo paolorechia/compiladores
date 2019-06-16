@@ -99,7 +99,7 @@ int label_to_integer(char * input_str);
 
 /* Symbol token functions / table higher-level functions */
 int insert_variable(symbol_table * symbol, char * identifier, int lexical_level, int offset);
-void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label);
+void insert_procedure(symbol_table * table, char * ident_token, int lexical_level, char * label, thead * parameter_list);
 int update_subroutine_parameters(symbol_table * table);
 int copy_parameters_to_table(symbol_table * table);
 int remove_parameters(symbol_table * table);

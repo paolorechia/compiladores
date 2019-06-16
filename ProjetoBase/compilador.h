@@ -32,7 +32,7 @@ typedef enum simbolos {
   simb_ponto, simb_virgula, simb_ponto_e_virgula, simb_dois_pontos,
   simb_dois_pontos_igual, simb_abre_parenteses, simb_fecha_parenteses,
   simb_mais, simb_menos, simb_asterico, simb_barra, simb_maior,
-  simb_menor, simb_igual, simb_read, simb_write
+  simb_menor, simb_igual, simb_read, simb_write, simb_forward
 } simbolos;
 
 

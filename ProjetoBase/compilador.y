@@ -25,6 +25,7 @@ int label_counter = 0;
 char label[LABEL_MAX_SIZE];
 char * label_pter;
 char * label_pter2;
+char last_procedure_identifier[TAM_TOKEN];
 char last_identifier[TAM_TOKEN];
 char last_variable_identifier[TAM_TOKEN];
 char last_instruction[TAM_TOKEN];
@@ -62,6 +63,7 @@ extern char * yytext;
 %token AND OR TRUE FALSE
 %token READ WRITE
 %token LABEL GOTO
+%token FORWARD
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE 
@@ -86,12 +88,14 @@ bloco       :
                 geraCodigo(NULL, temp_str);
                 push_label_stack(&label_stack, label);
               } 
-              bloco_subrotina { 
+              bloco_subrotina
+              { 
                 label_pter = pop_label_stack(&label_stack); 
 //                print_label_stack(&label_stack);
                 geraCodigo(label_pter, "NADA");
                 free(label_pter);
-              } comando_composto {
+              }
+              comando_composto {
                 printf("Leaving block... before cleaning up...\n");
                 printf("Lexical level: %d\n", lexical_level);
                 print_table(table);
@@ -120,45 +124,58 @@ declara_rotulo: NUMERO {
 ;
 
 
-blobo_subrotina: lista_subrotinas |
+bloco_subrotina: lista_subrotinas |
 ;
-
 
 lista_subrotinas: lista_subrotinas declara_subrotina | declara_subrotina 
 ;
 
-declara_subrotina: declara_cabecalho_subrotina FORWARD PONTO_E_VIRGULA |
-                   declara_cabecalho_subrotina declara_subrotina_bloco;
-
-declara_cabecalho_procedimento: PROCEDURE_TOKEN lp PONTO_E_VIRGULA;
-
-continua_subrotina: FORWARD PONTO_E_VIRGULA | declara_subrotina_bloco;
-
-declara_subrotina_bloco: bloco PONTO_E_VIRGULA;
-
-declara_procedimento: PROCEDURE_TOKEN IDENT {
-                        lexical_level++;
+declara_subrotina: declara_cabecalho_procedure FORWARD PONTO_E_VIRGULA {
+                      lexical_level++;
+                      generate_label(&label_counter, (char * )label);
+                      insert_procedure(table, last_procedure_identifier, lexical_level, label, declaring_param_list);
+                      lexical_level--;
+                   } |
+                   declara_cabecalho_procedure { 
+                      lexical_level++;
+                      symb_pter = find_local_identifier(table, last_procedure_identifier, lexical_level);
+                      // Se encontrou, procedure ja foi declarado em forward
+                      if (symb_pter != NULL) {
+                        label_to_string(symb_pter->lexical_level, label);
+                        declaring_param_list = symb_pter->values.procedure.parameter_list;
+                      // Senao, criar
+                      } else {
                         generate_label(&label_counter, (char * )label);
-                        sprintf(temp_str, "ENPR %d", lexical_level);
-                        geraCodigo(label, temp_str);
-                        insert_procedure(table, token, lexical_level, label);
-                        declaring_param_list = l_init();
-                        push_istack(&offset_stack, 0);
-                        param_num = 0; 
+                        insert_procedure(table, last_procedure_identifier, lexical_level, label, declaring_param_list);
                       }
-                      lp
-                      PONTO_E_VIRGULA 
-                      bloco {
-//                        print_table(table);
-                        // TODO: verificar se param_num funciona corretamente 
+                      print_table(table);
+                      // Entrada em bloco do procedimento
+                      copy_parameters_to_table_from_id(table, last_procedure_identifier);
+                      update_subroutine_parameters(table);
+                      print_table(table);
+                      sprintf(temp_str, "ENPR %d", lexical_level);
+                      geraCodigo(label, temp_str);
+                   } declara_procedure_bloco |
+                   declara_funcao
+                   
+;
+
+declara_cabecalho_procedure: PROCEDURE_TOKEN IDENT {
+                          strncpy(last_procedure_identifier, token, TAM_TOKEN);
+                          declaring_param_list = l_init();
+                          param_num = 0; 
+                        } lp PONTO_E_VIRGULA;
+
+declara_procedure_bloco: bloco {
+                        // TODO insert subroutine into table here
                         sprintf(temp_str, "RTPR %d, %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         lexical_level--;
-                        pop_istack(&offset_stack);
 //                        print_table(table);
                       }
                      PONTO_E_VIRGULA
 ;
+
 
 declara_funcao: FUNCTION_TOKEN IDENT {
                         lexical_level++;
@@ -167,7 +184,6 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         geraCodigo(label, temp_str);
                         insert_function(table, token, lexical_level, label);
                         declaring_param_list = l_init();
-                        push_istack(&offset_stack, 0);
                         param_num = 0; 
                       }
                       lp
@@ -181,18 +197,12 @@ declara_funcao: FUNCTION_TOKEN IDENT {
                         sprintf(temp_str, "RTPR %d, %d", lexical_level, param_num);
                         geraCodigo(NULL, temp_str);
                         lexical_level--;
-                        pop_istack(&offset_stack);
                       }
                      PONTO_E_VIRGULA
 ;
 
-lp: ABRE_PARENTESES  lista_parametros  {
-                        copy_parameters_to_table(table);
-                        update_subroutine_parameters(table);
-                        }
-    FECHA_PARENTESES | 
+lp: ABRE_PARENTESES  lista_parametros FECHA_PARENTESES | 
     ABRE_PARENTESES FECHA_PARENTESES |
-
 ;
 
 lista_parametros:  lista_parametros pv_ou_v parametro { param_num++;} |
@@ -201,12 +211,10 @@ lista_parametros:  lista_parametros pv_ou_v parametro { param_num++;} |
 pv_ou_v: VIRGULA | PONTO_E_VIRGULA;
 
 parametro: IDENT {  strcpy(last_identifier, token); } DOIS_PONTOS tipo {
-//            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYVAL);
             VariableType var_type = parse_var_type(token);
             l_insert(declaring_param_list, last_identifier, var_type, BYVAL);
            } 
            | VAR IDENT  { strcpy(last_identifier, token); } DOIS_PONTOS tipo {
-//            VariableType tokenType = insert_parameter(table, last_identifier, lexical_level, token, BYREFERENCE);
             VariableType var_type = parse_var_type(token);
             l_insert(declaring_param_list, last_identifier, var_type, BYREFERENCE);
            }
